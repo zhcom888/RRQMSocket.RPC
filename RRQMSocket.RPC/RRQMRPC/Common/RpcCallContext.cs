@@ -19,11 +19,26 @@ namespace RRQMSocket.RPC.RRQMRPC
     /// </summary>
     public class RpcCallContext : ICallContext
     {
-        internal ICaller caller;
-        internal CancellationTokenSource tokenSource;
-        internal RpcContext context;
-        internal MethodInstance methodInstance;
-        internal MethodInvoker methodInvoker;
+        private ICaller caller;
+        private CancellationTokenSource tokenSource;
+        private RpcContext context;
+        private MethodInstance methodInstance;
+        private MethodInvoker methodInvoker;
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="caller"></param>
+        /// <param name="context"></param>
+        /// <param name="methodInstance"></param>
+        /// <param name="methodInvoker"></param>
+        public RpcCallContext(ICaller caller, RpcContext context, MethodInstance methodInstance, MethodInvoker methodInvoker)
+        {
+            this.caller = caller;
+            this.context = context;
+            this.methodInstance = methodInstance;
+            this.methodInvoker = methodInvoker;
+        }
 
         /// <summary>
         /// <inheritdoc/>
@@ -33,7 +48,17 @@ namespace RRQMSocket.RPC.RRQMRPC
         /// <summary>
         /// 能取消的调用令箭，在客户端主动取消或网络故障时生效
         /// </summary>
-        public CancellationTokenSource TokenSource => tokenSource;
+        public CancellationTokenSource TokenSource
+        {
+            get 
+            {
+                if (this.tokenSource==null)
+                {
+                    this.tokenSource = new CancellationTokenSource();
+                }
+                return this.tokenSource;
+            }
+        }
 
         /// <summary>
         /// <inheritdoc/>

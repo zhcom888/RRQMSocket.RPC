@@ -29,6 +29,7 @@ namespace RRQMSocket.RPC.RRQMRPC
         private byte feedback;
         private byte invokeType;
         private byte serializationType;
+
         /// <summary>
         /// 反馈类型
         /// </summary>

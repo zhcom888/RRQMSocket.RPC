@@ -18,7 +18,6 @@ using RRQMCore.Serialization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
 
 namespace RRQMSocket.RPC.RRQMRPC
 {
@@ -91,7 +90,7 @@ namespace RRQMSocket.RPC.RRQMRPC
 
             foreach (var item in this.contextDic.Values)
             {
-                item.tokenSource.Cancel();
+                item.TokenSource.Cancel();
             }
             this.contextDic.Clear();
             this.serverProviderDic.Clear();
@@ -126,8 +125,6 @@ namespace RRQMSocket.RPC.RRQMRPC
         /// <param name="byteBlock"></param>
         protected override sealed void HandleProtocolData(short procotol, ByteBlock byteBlock)
         {
-            byte[] buffer = byteBlock.Buffer;
-            int r = (int)byteBlock.Position;
             switch (procotol)
             {
                 case 100:/*100，请求RPC文件*/
@@ -152,7 +149,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                     {
                         try
                         {
-                            DiscoveryServiceWaitResult waitResult = RRQMCore.Serialization.SerializeConvert.RRQMBinaryDeserialize<DiscoveryServiceWaitResult>(buffer, 2);
+                            DiscoveryServiceWaitResult waitResult = SerializeConvert.RRQMBinaryDeserialize<DiscoveryServiceWaitResult>(byteBlock.Buffer, 2);
                             waitResult.Methods = ((IRRQMRpcParser)this.Service).GetRegisteredMethodItems(waitResult.PT, this);
                             byte[] data = SerializeConvert.RRQMBinarySerialize(waitResult);
                             this.InternalSend(102, data, 0, data.Length);
@@ -165,7 +162,6 @@ namespace RRQMSocket.RPC.RRQMRPC
                     }
                 case 103:/*ID调用客户端*/
                     {
-
                         byteBlock.Pos = 2;
                         RpcContext content = RpcContext.Deserialize(byteBlock);
 
@@ -206,39 +202,13 @@ namespace RRQMSocket.RPC.RRQMRPC
                             int sign = RRQMBitConverter.Default.ToInt32(byteBlock.Buffer, 2);
                             if (this.contextDic.TryGetValue(sign, out RpcCallContext context))
                             {
-                                context.tokenSource.Cancel();
+                                context.TokenSource.Cancel();
                             }
                         }
                         catch (Exception e)
                         {
                             Logger.Debug(LogType.Error, this, $"错误代码: {procotol}, 错误详情:{e.Message}");
                         }
-                        break;
-                    }
-                case 106:/*发布事件*/
-                    {
-                        break;
-                    }
-                case 107:/*取消发布事件*/
-                    {
-                        break;
-                    }
-                case 108:/*订阅事件*/
-                    {
-                        break;
-                    }
-                case 109:/*触发事件*/
-                    {
-                        
-                        break;
-                    }
-                case 111:/*获取所有事件*/
-                    {
-                        break;
-                    }
-
-                case 112:/*取消订阅*/
-                    {
                         break;
                     }
                 default:
@@ -285,6 +255,11 @@ namespace RRQMSocket.RPC.RRQMRPC
             this.OnHandleDefaultData(procotol, byteBlock);
         }
 
+        private void CanceledInvoke(int sign)
+        {
+            this.InternalSend(113, RRQMBitConverter.Default.GetBytes(sign));
+        }
+
         private void ExecuteContext(RpcContext context)
         {
             MethodInvoker methodInvoker = new MethodInvoker();
@@ -303,16 +278,11 @@ namespace RRQMSocket.RPC.RRQMRPC
                             methodInvoker.AsyncRun = true;
 
                             ps = new object[methodInstance.ParameterTypes.Length];
-                            RpcCallContext serverCallContext = new RpcCallContext();
-                            serverCallContext.tokenSource = new System.Threading.CancellationTokenSource();
-                            serverCallContext.caller = this;
-                            serverCallContext.methodInvoker = methodInvoker;
-                            serverCallContext.methodInstance = methodInstance;
-                            serverCallContext.context = context;
+                          
+                            RpcCallContext callContext = new RpcCallContext(this, context, methodInstance, methodInvoker);
+                            this.contextDic.TryAdd(context.Sign, callContext);
 
-                            this.contextDic.TryAdd(context.Sign, serverCallContext);
-
-                            ps[0] = serverCallContext;
+                            ps[0] = callContext;
                             for (int i = 0; i < context.parametersBytes.Count; i++)
                             {
                                 ps[i + 1] = this.serializationSelector.DeserializeParameter(context.SerializationType, context.ParametersBytes[i], methodInstance.ParameterTypes[i + 1]);
@@ -372,7 +342,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                     context.parametersBytes = null;
                     context.Status = 1;
                     context.Serialize(returnByteBlock);
-                    this.InternalSend(101, returnByteBlock.Buffer, 0, returnByteBlock.Len);
+                    this.InternalSendAsync(101, returnByteBlock.Buffer, 0, returnByteBlock.Len);
                 }
                 finally
                 {
@@ -382,11 +352,6 @@ namespace RRQMSocket.RPC.RRQMRPC
             }
 
             this.ExecuteContext(context);
-        }
-
-        private void CanceledInvoke(int sign)
-        {
-            this.InternalSend(113, RRQMBitConverter.Default.GetBytes(sign));
         }
 
         #region RPC
@@ -644,6 +609,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             {
                                 case WaitDataStatus.SetRunning:
                                     break;
+
                                 case WaitDataStatus.Overtime:
                                     {
                                         throw new RRQMTimeoutException("等待结果超时");
@@ -873,7 +839,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             {
                                 case WaitDataStatus.SetRunning:
                                     {
-                                       return (RpcContext)waitData.WaitResult;
+                                        return (RpcContext)waitData.WaitResult;
                                     }
                                 case WaitDataStatus.Overtime:
                                     {
@@ -894,6 +860,6 @@ namespace RRQMSocket.RPC.RRQMRPC
             }
         }
 
-        #endregion
+        #endregion RPC
     }
 }

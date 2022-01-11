@@ -1090,19 +1090,6 @@ namespace RRQMSocket.RPC.RRQMRPC
                         }
                         break;
                     }
-                case 106:
-                case 107:
-                case 108:
-                case 109:
-                case 111:
-                    {
-                        break;
-                    }
-
-                case 110:
-                    {
-                        break;
-                    }
                 case 113:
                     {
                         try
@@ -1110,7 +1097,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             int sign = RRQMBitConverter.Default.ToInt32(byteBlock.Buffer, 2);
                             if (this.contextDic.TryGetValue(sign, out RpcCallContext context))
                             {
-                                context.tokenSource.Cancel();
+                                context.TokenSource.Cancel();
                             }
                         }
                         catch (Exception e)
@@ -1215,16 +1202,10 @@ namespace RRQMSocket.RPC.RRQMRPC
                             methodInvoker.AsyncRun = true;
 
                             ps = new object[methodInstance.ParameterTypes.Length];
-                            RpcCallContext serverCallContext = new RpcCallContext();
-                            serverCallContext.tokenSource = new System.Threading.CancellationTokenSource();
-                            serverCallContext.caller = this;
-                            serverCallContext.methodInvoker = methodInvoker;
-                            serverCallContext.methodInstance = methodInstance;
-                            serverCallContext.context = context;
+                            RpcCallContext callContext = new RpcCallContext(this, context, methodInstance, methodInvoker);
+                            this.contextDic.TryAdd(context.Sign, callContext);
 
-                            this.contextDic.TryAdd(context.Sign, serverCallContext);
-
-                            ps[0] = serverCallContext;
+                            ps[0] = callContext;
                             for (int i = 0; i < context.parametersBytes.Count; i++)
                             {
                                 ps[i + 1] = this.serializationSelector.DeserializeParameter(context.SerializationType, context.ParametersBytes[i], methodInstance.ParameterTypes[i + 1]);

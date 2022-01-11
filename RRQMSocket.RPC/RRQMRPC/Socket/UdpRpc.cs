@@ -33,7 +33,7 @@ namespace RRQMSocket.RPC.RRQMRPC
         private MethodStore methodStore;
         private SerializationSelector serializationSelector;
         private RRQMWaitHandlePool<IWaitResult> waitHandlePool;
-        
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -182,11 +182,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                         if (methodInstance.MethodFlags.HasFlag(MethodFlags.IncludeCallContext))
                         {
                             ps = new object[methodInstance.ParameterTypes.Length];
-                            RpcCallContext callContext = new RpcCallContext();
-                            callContext.caller = caller;
-                            callContext.methodInstance = methodInstance;
-                            callContext.methodInvoker = methodInvoker;
-                            callContext.context = context;
+                            RpcCallContext callContext = new RpcCallContext(caller, context, methodInstance, methodInvoker);
                             ps[0] = callContext;
                             for (int i = 0; i < context.parametersBytes.Count; i++)
                             {
@@ -958,7 +954,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             DiscoveryServiceWaitResult waitResult = SerializeConvert.RRQMBinaryDeserialize<DiscoveryServiceWaitResult>(buffer, 2);
                             waitResult.Methods = ((IRRQMRpcParser)this).GetRegisteredMethodItems(waitResult.PT, new UdpCaller(this, remoteEndPoint));
                             byte[] data = SerializeConvert.RRQMBinarySerialize(waitResult);
-                            this.UDPSend(104,remoteEndPoint, data, 0, data.Length);
+                            this.UDPSend(104, remoteEndPoint, data, 0, data.Length);
                         }
                         catch (Exception e)
                         {
@@ -1003,7 +999,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             int sign = RRQMBitConverter.Default.ToInt32(byteBlock.Buffer, 2);
                             if (this.contextDic.TryGetValue(sign, out RpcCallContext context))
                             {
-                                context.tokenSource.Cancel();
+                                context.TokenSource.Cancel();
                             }
                         }
                         catch (Exception e)
@@ -1058,7 +1054,7 @@ namespace RRQMSocket.RPC.RRQMRPC
         {
             this.UDPSend(103, RRQMBitConverter.Default.GetBytes(sign));
         }
-        
+
         private void ExecuteContext(RpcContext context, EndPoint endPoint)
         {
             MethodInvoker methodInvoker = new MethodInvoker();
@@ -1077,16 +1073,10 @@ namespace RRQMSocket.RPC.RRQMRPC
                             methodInvoker.AsyncRun = true;
 
                             ps = new object[methodInstance.ParameterTypes.Length];
-                            RpcCallContext serverCallContext = new RpcCallContext();
-                            serverCallContext.tokenSource = new System.Threading.CancellationTokenSource();
-                            serverCallContext.caller = new UdpCaller(this, endPoint);
-                            serverCallContext.methodInvoker = methodInvoker;
-                            serverCallContext.methodInstance = methodInstance;
-                            serverCallContext.context = context;
+                            RpcCallContext callContext = new RpcCallContext(new UdpCaller(this, endPoint), context, methodInstance, methodInvoker);
+                            this.contextDic.TryAdd(context.Sign, callContext);
 
-                            this.contextDic.TryAdd(context.Sign, serverCallContext);
-
-                            ps[0] = serverCallContext;
+                            ps[0] = callContext;
                             for (int i = 0; i < context.parametersBytes.Count; i++)
                             {
                                 ps[i + 1] = this.serializationSelector.DeserializeParameter(context.SerializationType, context.ParametersBytes[i], methodInstance.ParameterTypes[i + 1]);
@@ -1146,7 +1136,7 @@ namespace RRQMSocket.RPC.RRQMRPC
 
             this.ExecuteContext(context, endPoint);
         }
-       
+
         #region UDP发送
 
         private void UDPSend(short procotol, byte[] buffer, int offset, int length)

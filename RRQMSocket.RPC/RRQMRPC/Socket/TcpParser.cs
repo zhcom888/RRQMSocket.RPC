@@ -120,6 +120,41 @@ namespace RRQMSocket.RPC.RRQMRPC
         }
 
         /// <summary>
+        /// 选择ID然后调用反向RPC
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="method"></param>
+        /// <param name="invokeOption"></param>
+        /// <param name="parameters"></param>
+        public void Invoke(string id, string method, InvokeOption invokeOption, params object[] parameters)
+        {
+            if (!this.TryGetSocketClient(id, out TClient client))
+            {
+                throw new RRQMRPCException("没有找到对应ID的客户端");
+            }
+            client.Invoke(method, invokeOption, parameters);
+        }
+
+        /// <summary>
+        /// 选择ID然后调用反向RPC
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <param name="method"></param>
+        /// <param name="invokeOption"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public T Invoke<T>(string id, string method, InvokeOption invokeOption, params object[] parameters)
+        {
+            if (!this.TryGetSocketClient(id, out TClient client))
+            {
+                throw new RRQMRPCException("没有找到对应ID的客户端");
+            }
+
+            return client.Invoke<T>(method, invokeOption, parameters);
+        }
+
+        /// <summary>
         /// <inheritdoc/>
         /// </summary>
         /// <param name="methodInvoker"></param>
@@ -314,6 +349,24 @@ namespace RRQMSocket.RPC.RRQMRPC
             this.RRQMExecuteMethod.Invoke(this, methodInvoker, methodInstance);
         }
 
+        private void IDInvoke(RpcContext rpcContext)
+        {
+            if (this.TryGetSocketClient(rpcContext.id, out TClient client))
+            {
+                var context = client.Invoke(rpcContext, 10 * 1000);
+                if (context != null)
+                {
+                    rpcContext.Status = context.Status;
+                    rpcContext.returnParameterBytes = context.returnParameterBytes;
+                }
+            }
+            else
+            {
+
+            }
+
+        }
+
         private void OnBeforeReceiveStream(RpcSocketClient client, StreamOperationEventArgs e)
         {
             this.BeforeReceiveStream?.Invoke((TClient)client, e);
@@ -327,59 +380,6 @@ namespace RRQMSocket.RPC.RRQMRPC
         private void OnReceivedStream(RpcSocketClient client, StreamStatusEventArgs e)
         {
             this.ReceivedStream?.Invoke((TClient)client, e);
-        }
-
-        /// <summary>
-        /// 选择ID然后调用反向RPC
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="method"></param>
-        /// <param name="invokeOption"></param>
-        /// <param name="parameters"></param>
-        public void Invoke(string id, string method, InvokeOption invokeOption, params object[] parameters)
-        {
-            if (!this.TryGetSocketClient(id, out TClient client))
-            {
-                throw new RRQMRPCException("没有找到对应ID的客户端");
-            }
-            client.Invoke(method, invokeOption, parameters);
-        }
-
-        /// <summary>
-        /// 选择ID然后调用反向RPC
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="id"></param>
-        /// <param name="method"></param>
-        /// <param name="invokeOption"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        public T Invoke<T>(string id, string method, InvokeOption invokeOption, params object[] parameters)
-        {
-            if (!this.TryGetSocketClient(id, out TClient client))
-            {
-                throw new RRQMRPCException("没有找到对应ID的客户端");
-            }
-
-            return client.Invoke<T>(method, invokeOption, parameters);
-        }
-
-        private void IDInvoke(RpcContext rpcContext)
-        {
-            if (this.TryGetSocketClient(rpcContext.id, out TClient client))
-            {
-                var context=client.Invoke(rpcContext, 10 * 1000);
-                if (context!=null)
-                {
-                    rpcContext.Status = context.Status;
-                    rpcContext.returnParameterBytes = context.returnParameterBytes;
-                }
-            }
-            else
-            { 
-            
-            }
-            
         }
     }
 }
