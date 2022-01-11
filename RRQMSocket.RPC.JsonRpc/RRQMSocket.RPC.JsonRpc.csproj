@@ -4,25 +4,25 @@
 		<ApplicationIcon>RRQM.ico</ApplicationIcon>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>RRQM.pfx</AssemblyOriginatorKeyFile>
-		<Version>6.3.0</Version>
+		<Version>6.4.0</Version>
 		<LangVersion>9.0</LangVersion>
 		<Company>若汝棋茗</Company>
 		<Copyright>Copyright © 2021 若汝棋茗</Copyright>
-		<Description>介绍：这是一个扩展于RRQMSocket.RPC的JsonRpc组件，可以通过该组件直接创建JsonRpc服务解析器，让Web端、移动端可以跨语言调用RPC函数。功能支持JsonRpc全功能。
+		<Description>介绍：这是一个扩展于RRQMSocket.RPC的JsonRpc组件，支持TCP、HTTP/HTTPS协议调用JsonRpc。让Web端、移动端可以跨语言调用RPC函数。功能支持JsonRpc 2.0全功能。
 
 更新说明：
 适配更新
 
-Demo：https://gitee.com/RRQM_OS/RRQMBox
-API：https://gitee.com/RRQM_OS/RRQM/wikis/pages</Description>
-		<PackageProjectUrl>https://gitee.com/dotnetchina/RRQMSocket</PackageProjectUrl>
+API：https://gitee.com/RRQM_Home/RRQMBox/wikis
+DEMO：https://gitee.com/RRQM_Home/RRQMBox</Description>
+		<PackageProjectUrl>https://gitee.com/RRQM_Home/rrqmsocket.rpc</PackageProjectUrl>
 		<PackageIconUrl></PackageIconUrl>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<PackageIcon>RRQM.png</PackageIcon>
 		<Authors>若汝棋茗</Authors>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageTags>JsonRpc;Socket;IOCP</PackageTags>
+		<PackageTags>JsonRpc;Socket;IOCP,TCP,HTTP,HTTPS</PackageTags>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
@@ -75,7 +75,7 @@ API：https://gitee.com/RRQM_OS/RRQM/wikis/pages</Description>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="RRQMSocket.Http" Version="6.3.0" />
-	  <PackageReference Include="RRQMSocket.RPC" Version="6.3.0" />
+	  <PackageReference Include="RRQMSocket.Http" Version="6.4.0" />
+	  <PackageReference Include="RRQMSocket.RPC" Version="6.4.0" />
 	</ItemGroup>
 </Project>
