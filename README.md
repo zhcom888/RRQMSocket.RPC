@@ -23,20 +23,20 @@
 ## 💿描述
 | 名称|地址 |描述|
 |---|---|---|
-|[![NuGet version (RRQMSocket)](https://img.shields.io/nuget/v/RRQMSocket.svg?label=RRQMSocket)](https://www.nuget.org/packages/RRQMSocket/)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket)| **RRQMSocket**是一个整合性的、超轻量级的、可以免费商用使用<br>的网络通信服务框架。它具有 **高并发连接** 、 **高并发处理** 、 <br>**事件订阅** 、 **插件式扩展** 、 **多线程处理** 、 **内存池** 、 **对象池** <br>等特点，让使用者能够更加简单的、快速的搭建网络框架。|
-|[![NuGet version](https://img.shields.io/nuget/v/RRQMSocketFramework.svg?label=RRQMSocketFramework)](https://www.nuget.org/packages/RRQMSocketFramework/)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket) |**RRQMSocketFramework**是RRQMSocket系列的增强企业版，<br>两者在基础功能上没有区别，但是在扩展功能上有一定差异性，<br>例如RPC中的EventBus、文件传输中的限速功能等，<br>具体差异请看[RRQM商业运营](https://gitee.com/RRQM_OS/RRQM/wikis/%E5%95%86%E4%B8%9A%E8%BF%90%E8%90%A5)|
+|[![NuGet version (RRQMSocket.RPC)](https://img.shields.io/nuget/v/RRQMSocket.RPC.svg?label=RRQMSocket.RPC)](https://www.nuget.org/packages/rrqmsocket.rpc)|[Gitee](https://gitee.com/RRQM_Home/rrqmsocket.rpc)<br>[Github](https://github.com/RRQM/RRQMSocket.RPC) |RPC是一个超轻量、高性能、可扩展的微服务管理平台框架，<br>目前已完成开发**RRQMRPC**、**XmlRpc**、**JsonRpc**、**WebApi**部分。<br> **RRQMRPC**部分使用RRQM专属协议，支持客户端**异步调用**，<br>服务端**异步触发**、以及**out**和**ref**关键字，**函数回调**等。<br>在调用效率上也是非常强悍，在调用空载函数，且返回状态时，<br>**10w**次调用仅用时**3.8**秒，不返回状态用时**0.9**秒。<br>其他协议调用性能详看性能评测。
+|[![NuGet version (RRQMSocket.RPC.XmlRpc)](https://img.shields.io/nuget/v/RRQMSocket.RPC.XmlRpc.svg?label=RRQMSocket.RPC.XmlRpc)](https://www.nuget.org/packages/rrqmsocket.rpc.xmlrpc)|[Gitee](https://gitee.com/RRQM_Home/rrqmsocket.rpc)<br>[Github](https://github.com/RRQM/RRQMSocket.RPC) | XmlRpc是一个扩展于RRQMSocket.RPC的XmlRpc组件，可以通过<br>该组件创建XmlRpc服务解析器，完美支持XmlRpc数据类型，类型嵌套，<br>Array等，也能与CookComputing.XmlRpcV2完美对接。<br>不限Web，Android等平台。|
+| [![NuGet version (RRQMSocket.RPC.JsonRpc)](https://img.shields.io/nuget/v/RRQMSocket.RPC.JsonRpc.svg?label=RRQMSocket.RPC.JsonRpc)](https://www.nuget.org/packages/rrqmsocket.rpc.jsonrpc)|[Gitee](https://gitee.com/RRQM_Home/rrqmsocket.rpc)<br>[Github](https://github.com/RRQM/RRQMSocket.RPC) | JsonRpc是一个扩展于RRQMSocket.RPC的JsonRpc组件，<br>可以通过该组件创建JsonRpc服务解析器，支持JsonRpc全部功能，可与Web，Android等平台无缝对接。|
+|[![NuGet version (RRQMSocket.RPC.WebApi)](https://img.shields.io/nuget/v/RRQMSocket.RPC.WebApi.svg?label=RRQMSocket.RPC.WebApi)](https://www.nuget.org/packages/rrqmsocket.rpc.webapi)|[Gitee](https://gitee.com/RRQM_Home/rrqmsocket.rpc)<br>[Github](https://github.com/RRQM/RRQMSocket.RPC) | WebApi是一个扩展于RRQMSocket.RPC的WebApi组件，可以通过<br>该组件创建WebApi服务解析器，让桌面端、Web端、移动端可以<br>跨语言调用RPC函数。功能支持路由、Get传参、Post传参等。|
 
 ## 🎀依赖、扩展库
 | 名称|地址 |描述|
 |---|---|---|
 | [![NuGet version (RRQMCore)](https://img.shields.io/nuget/v/RRQMCore.svg?label=RRQMCore)](https://www.nuget.org/packages/RRQMCore)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket) | RRQMCore是为RRQM系提供基础服务功能的库，其中包含：<br>**内存池**、**对象池**、**等待逻辑池**、**AppMessenger**、**3DES加密**、<br>**Xml快速存储**、**运行时间测量器**、**文件快捷操作**、<br>**高性能序列化器**、**规范日志接口**等。 |
-| [![NuGet version (RRQMSocket.FileTransfer)](https://img.shields.io/nuget/v/RRQMSocket.FileTransfer.svg?label=RRQMSocket.FileTransfer)](https://www.nuget.org/packages/rrqmsocket.filetransfer)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket) |  RRQMSocket.FileTransfer是一个高性能的文件传输框架，您可以<br>用它传输**任意大小**的文件，它可以完美支持**上传下载混合式队列传输**、<br>**断点续传**、 **快速上传** 、**传输限速**、**获取文件信息**、**删除文件**等。<br>在实时测试中，它的传输速率可达1000Mb/s。 |
-| [![NuGet version (RRQMSocket.WebSocket)](https://img.shields.io/nuget/v/RRQMSocket.WebSocket.svg?label=RRQMSocket.WebSocket)](https://www.nuget.org/packages/rrqmsocket.websocket)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket) |  RRQMSocket.WebSocket是一个高效，超轻量级的WebSocket框架。<br>它包含了Service和Client两大组件，同时定义了文本、二进制或<br>其他类型数据的快捷发送、分片发送接口，可与js等任意WebSocket组件交互|
+|[![NuGet version (RRQMSocket)](https://img.shields.io/nuget/v/RRQMSocket.svg?label=RRQMSocket)](https://www.nuget.org/packages/RRQMSocket/)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket)| RRQMSocket是一个整合性的、超轻量级的网络通信框架。<br>包含了TCP、UDP、Ssl、Channel、Protocol、Token、<br>租户模式等一系列的通信模块。其扩展组件包含：WebSocket、<br>大文件传输、RPC、WebApi、XmlRpc、JsonRpc等内容|
+|[![NuGet version](https://img.shields.io/nuget/v/RRQMSocketFramework.svg?label=RRQMSocketFramework)](https://www.nuget.org/packages/RRQMSocketFramework/)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket) |**RRQMSocketFramework**是RRQMSocket系列的增强企业版，<br>两者在基础功能上没有区别，但是在扩展功能上有一定差异性，<br>例如RPC中的EventBus、文件传输中的限速功能等，<br>具体差异请看[RRQM商业运营](https://gitee.com/RRQM_OS/RRQM/wikis/%E5%95%86%E4%B8%9A%E8%BF%90%E8%90%A5)|
+| [![NuGet version (RRQMSocket.WebSocket)](https://img.shields.io/nuget/v/RRQMSocket.WebSocket.svg?label=RRQMSocket.WebSocket)](https://www.nuget.org/packages/rrqmsocket.websocket)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket) |  RRQMSocket.WebSocket是一个高效，超轻量级的WebSocket框架。<br>它包含了Service和Client两大组件，支持Ssl，同时定义了文本、二进制或<br>其他类型数据的快捷发送、分片发送接口，可与js等任意WebSocket组件交互|
 | [![NuGet version (RRQMSocket.Http)](https://img.shields.io/nuget/v/RRQMSocket.Http.svg?label=RRQMSocket.Http)](https://www.nuget.org/packages/rrqmsocket.http)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket)  |  RRQMSocket.Http是一个能够简单解析Http的服务组件，<br>能够快速响应Http服务请求。|
-|[![NuGet version (RRQMSocket.RPC)](https://img.shields.io/nuget/v/RRQMSocket.RPC.svg?label=RRQMSocket.RPC)](https://www.nuget.org/packages/rrqmsocket.rpc)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket) |RPC是一个超轻量、高性能、可扩展的微服务管理平台框架，<br>目前已完成开发**RRQMRPC**、**XmlRpc**、**JsonRpc**、**WebApi**部分。<br> **RRQMRPC**部分使用RRQM专属协议，支持客户端**异步调用**，<br>服务端**异步触发**、以及**out**和**ref**关键字，**函数回调**等。<br>在调用效率上也是非常强悍，在调用空载函数，且返回状态时，<br>**10w**次调用仅用时**3.8**秒，不返回状态用时**0.9**秒。<br>其他协议调用性能详看性能评测。
-|[![NuGet version (RRQMSocket.RPC.XmlRpc)](https://img.shields.io/nuget/v/RRQMSocket.RPC.XmlRpc.svg?label=RRQMSocket.RPC.XmlRpc)](https://www.nuget.org/packages/rrqmsocket.rpc.xmlrpc)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket)| XmlRpc是一个扩展于RRQMSocket.RPC的XmlRpc组件，可以通过<br>该组件创建XmlRpc服务解析器，完美支持XmlRpc数据类型，类型嵌套，<br>Array等，也能与CookComputing.XmlRpcV2完美对接。<br>不限Web，Android等平台。|
-| [![NuGet version (RRQMSocket.RPC.JsonRpc)](https://img.shields.io/nuget/v/RRQMSocket.RPC.JsonRpc.svg?label=RRQMSocket.RPC.JsonRpc)](https://www.nuget.org/packages/rrqmsocket.rpc.jsonrpc)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket)| JsonRpc是一个扩展于RRQMSocket.RPC的JsonRpc组件，<br>可以通过该组件创建JsonRpc服务解析器，支持JsonRpc全部功能，可与Web，Android等平台无缝对接。|
-|[![NuGet version (RRQMSocket.RPC.WebApi)](https://img.shields.io/nuget/v/RRQMSocket.RPC.WebApi.svg?label=RRQMSocket.RPC.WebApi)](https://www.nuget.org/packages/rrqmsocket.rpc.webapi)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket)| WebApi是一个扩展于RRQMSocket.RPC的WebApi组件，可以通过<br>该组件创建WebApi服务解析器，让桌面端、Web端、移动端可以<br>跨语言调用RPC函数。功能支持路由、Get传参、Post传参等。|
+| [![NuGet version (RRQMSocket.FileTransfer)](https://img.shields.io/nuget/v/RRQMSocket.FileTransfer.svg?label=RRQMSocket.FileTransfer)](https://www.nuget.org/packages/rrqmsocket.filetransfer)|[Gitee](https://gitee.com/RRQM_Home/rrqmsocket.filetransfer)<br>[Github](https://github.com/RRQM/RRQMSocket.FileTransfer) |  这是一个高性能的C/S架构的文件传输框架，您可以用它传输<br>**任意大小**的文件，它可以完美支持**上传下载混合式队列传输**、<br>**断点续传**、 **快速上传** 、**传输限速**、**获取文件信息**、**删除文件**等。<br>在实际测试中，它的传输速率可达1000Mb/s。 |
 
 
 ## 🖥支持环境
@@ -50,22 +50,62 @@
 - Blazor
 - Xamarin
 - Mono
-- Unity
+- Unity（在IL2cpp编译时，需要导入源码）
 - 其他（即所有C#系）
 
-## 🌴RRQMSocket特点速览
+## 🌴 RPC特点速览
 
-#### 传统IOCP和RRQMSocket
+#### 【RRQMRPC】
 
-RRQMSocket的IOCP和传统也不一样，就以微软官方示例为例，使用MemoryBuffer开辟一块内存，均分，然后给每个会话分配一个区接收，等收到数据后，再**复制**源数据，然后把复制的数据进行处理。而RRQMSocket是每次接收之前，从内存池拿一个可用内存块，然后**直接用于接收**，等收到数据以后，直接就把这个内存块抛出处理，这样就避免了**复制操作**，虽然只是细小的设计，但是在传输**1000w**次**64kb**的数据时，性能相差了**10倍**。
+RRQMRPC是基于RRQM自制定协议的RPC组件，也是在RRQMSocket.RPC中最强悍的，其特性：
 
-#### 数据处理适配器
+- 支持**自定义**类型参数。
+- 支持**Ssl**加密调用。
+- 支持具有**默认值**的参数设定。
+- 支持**out、ref** 关键字参数。
+- 支持服务器**回调客户端** 。
+- 支持**客户端**之间**相互调用**。
+- 支持TCP、UDP等不同的协议调用相同服务。
+- 支持异步调用。
+- 支持权限管理，让非法调用死在萌芽时期。
+- 支持**静态织入调用**，**静态编译调用**，也支持**方法名+参数**调用。
+- 支持**调用配置**（类似MQTT的AtMostOnce，AtLeastOnce，ExactlyOnce）。
+- **支持EventBus**。
+- 支持**自定义序列化**。
+- **全异常反馈** ，服务器调用状态会完整的反馈到客户端（可以设置不反馈）。
+- 高性能，在保证送达但不返回的情况下，10w次调用用时0.8s，在返回的情况下，用时3.9s。
 
-相信大家都使用过其他的Socket产品，例如HPSocket，SuperSocket等，那么RRQMSocket在设计时也是借鉴了其他产品的优秀设计理念，数据处理适配器就是其中之一，但和其他产品的设计不同的是，RRQMSocket的适配器功能更加强大，它不仅可以提前解析数据包，还可以解析数据对象。例如：可以使用固定包头对数据进行预处理，从而解决**数据分包**、**粘包**的问题。也可以直接解析**HTTP**数据协议、WebSocket数据协议等。
+#### 【JsonRpc】
 
-#### 兼容性与适配
+JsonRpc解析器是遵循JsonRpc2.0的RPC服务组件，能够让使用者通过Json字符串基于TCP、HTTP/HTTPS协议就可以调用RPC服务，其特点有：
 
-RRQMSocket提供多种框架模型，能够完全兼容基于TCP、UDP协议的所有协议。例如：TcpService与TcpClient，其基础功能和Socket一模一样，只是增强了框架的**坚固性**和**并发性**，将**连接**和**接收数据**通过事件的形式抛出，让使用者能够更加友好的使用。
+- 支持**TCP、HTTP/HTTPS**协议 。
+- **C#端支持代理生成** 。
+- **全异常反馈** 。
+- 支持自定义类型。
+- 支持类型嵌套。
+- 支持内联调用。
+- 支持缺参调用。
+
+#### 【XmlRpc】
+
+使用XmlRpc解析器，就可以在RPCService中通过XmlRpc的调用方式直接调用服务，客户端可以使用**CookComputing.XmlRpcV2**进行对接，其特点：
+
+- **异常反馈** 
+- 支持**HTTP/HTTPS**协议 。
+- **C#端支持代理生成** 。
+- 支持自定义类型。
+- 支持类型嵌套。
+- 支持Array及自定义Array嵌套。
+
+#### 【WebApi】
+使用WebApi解析器，就可以在RPCService中通过WebApi的调用方式直接调用服务。
+
+- 高性能，100个客户端，10w次调用，仅用时17s。
+- 支持**HTTP/HTTPS**协议 。
+- **全异常反馈** 。
+- 支持大部分路由规则。
+- 支持js、Android等调用。
 
 ## 🔗联系作者
 
@@ -75,90 +115,22 @@ RRQMSocket提供多种框架模型，能够完全兼容基于TCP、UDP协议的�
 - 交流QQ群：234762506
 
 ## 🌟API手册
-- [ API首页 ](https://gitee.com/RRQM_OS/RRQM/wikis/pages)
-- [说明](https://gitee.com/RRQM_OS/RRQM/wikis/pages?sort_id=3984529&doc_id=1402901)
-- [ 历史更新 ](https://gitee.com/RRQM_OS/RRQM/wikis/pages?sort_id=4255623&doc_id=1402901)
-- [ 商业运营 ](https://gitee.com/RRQM_OS/RRQM/wikis/pages?sort_id=4215572&doc_id=1402901)
-- [疑难解答](https://gitee.com/RRQM_OS/RRQM/wikis/pages?sort_id=4245320&doc_id=1402901)
+- [ API首页 ](https://gitee.com/RRQM_Home/RRQMBox/wikis/API%E6%89%8B%E5%86%8C)
+- [说明](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E8%AF%B4%E6%98%8E(%E4%BD%BF%E7%94%A8%E5%89%8D%E5%BF%85%E8%A6%81%E9%98%85%E8%AF%BB))
+- [ 历史更新 ](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E5%8E%86%E5%8F%B2%E6%9B%B4%E6%96%B0)
+- [ 商业运营 ](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E5%95%86%E4%B8%9A%E8%BF%90%E8%90%A5)
+- [疑难解答](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E7%96%91%E9%9A%BE%E8%A7%A3%E7%AD%94)
 
 
 ## ✨简单示例
 
  **_更多配置请查看API文档的配置说明文档，一下仅以最简方式创建实例。_** 
 
-【TcpService】
 
-```
-SimpleTcpService service = new SimpleTcpService();
-service.Connected += (client, e) =>{//有客户端连接};
-service.Disconnected += (client, e) =>{//有客户端断开连接};
-service.Connecting += (client, e) =>{//e.IsPermitOperation = false;//是否允许连接};
-service.Received += (client, byteBlock, obj) =>
-{
-    //从客户端收到信息
-    string mes = Encoding.UTF8.GetString(byteBlock.Buffer, 0, byteBlock.Len);
-    Console.WriteLine($"已从{client.Name}接收到信息：{mes}");//Name即IP+Port
-};
-//声明配置
-var config = new TcpServiceConfig();
-config.ListenIPHosts = new IPHost[] { new IPHost("127.0.0.1:7789"), new IPHost(7790) };//同时监听两个地址
-//载入配置
-service.Setup(config);
-//启动
-try
-{
-    service.Start();
-    Console.WriteLine("简单服务器启动成功");
-}
-catch (Exception ex)
-{
-    Console.WriteLine(ex.Message);
-}
-```
 
-【TcpClient】
-
-```
-SimpleTcpClient tcpClient = new SimpleTcpClient();
-tcpClient.Connected += (client, e) =>{//成功连接到服务器};
-tcpClient.Disconnected += (client, e) =>{//从服务器断开连接，当连接不成功时不会触发。};
-//载入配置
-tcpClient.Setup("127.0.0.1:7789");
-tcpClient.Connect();
-tcpClient.Send(new byte[]{1,2,3});
-```
 
 ## 🧲应用场景模拟
-***
- **【场景】** 
-
-我的服务器（客户端）是物联网硬件（或PLC硬件），我可以使用什么？
-
- **【应用建议】** 
-
-可以使用TcpService或TcpClient组件，这两个组件和原生Socket功能完全一样，只是可靠性、并发性能有很大的保障。不过一般的，RRQM内置的数据处理适配器可能不足以应对所有的数据协议包，所以可能需要自己重写数据处理适配器，具体详情可以参考一下连接内容。
-
-- [【RRQMSocket】C# 创建高并发、高性能TCP服务器，可用于解析HTTP、FTP、MQTT、搭建游戏服务器等](https://blog.csdn.net/qq_40374647/article/details/110679663)
-- [【RRQMSocket】C# 创建TCP客户端，对应RRQM服务器或其他服务器](https://blog.csdn.net/qq_40374647/article/details/121469610)
-- [【RRQMSocket】C# 利用数据处理适配器解决粘包、分包问题](https://blog.csdn.net/qq_40374647/article/details/110680179)
-- [【RRQMSocket】C# 自定义数据处理适配器](https://blog.csdn.net/qq_40374647/article/details/121824453)
-
-***
-
- **【场景】** 
-
-我想搭建一个服务器，能够实现文件传输，且需要一定交互能力，比如：客户端注册、客户端提交自身数据、服务器分发文件等。应该如何实现？
-
- **【应用建议】** 
-实现方式有很多，此处就最简单的方式推荐给大家。
-服务器搭建FileService+RPCService的组合即可（仅用一个端口实现的哦），然后客户端仅一个FileClient即可。可以参考下列内容。
-
->  **说明：FileService继承自TcpRpcParser，所以在添加解析器时，直接把FileService添加即可。同理，FileClient继承自TcpRpcClient。** 
-
-- [【RRQMSocket.RPC】C# 创建多协议、多方式、多语言、多平台RPC框架](https://blog.csdn.net/qq_40374647/article/details/109143243)
-- [【RRQMSocket.RPC】C# 创建基于TCP协议的支持ref和out关键字的RPC](https://blog.csdn.net/qq_40374647/article/details/121512993)
-- [【RRQMSocket.FileTransfer】C# 超大文件传输、续传、可高性能、高并发运行、断点续传、换网续传、快速上传等功能](https://blog.csdn.net/qq_40374647/article/details/100546120)
-
+[场景入口](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%E6%A8%A1%E6%8B%9F)
 
 ***
 
@@ -166,8 +138,6 @@ tcpClient.Send(new byte[]{1,2,3});
 
 谢谢大家对我的支持，如果还有其他问题，请加群QQ：234762506讨论。
 
-## 💕 支持本项目
-您的支持就是我不懈努力的动力。
+## 支持作者
 
-<img src="https://images.gitee.com/uploads/images/2021/0330/234046_7662fb8c_8553710.png" width = "600" height = "400" alt="图片名称" align=center />
-
+[支持入口](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E6%94%AF%E6%8C%81%E4%BD%9C%E8%80%85)
