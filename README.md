@@ -225,6 +225,7 @@ private static IRPCParser CreateJsonRpcParser(int port, JsonRpcProtocolType prot
 }
 
 ```
+
 【创建XmlRpc】
 
 ```
@@ -296,12 +297,179 @@ foreach (var item in ((WebApiParser)rpcService.RPCParsers["webApiParser_Json"]).
 
 【客户端调用】
 
-除RRQMRPC以外，其他端的调用均可使用其他工具调用调试，但是RRQM提供了便捷的客户端和代理生成。下面就展示一下如何在C#中优雅的调用。
+> 除RRQMRPC以外，其他端的调用均可使用其他工具调用调试，但是RRQM提供了便捷的客户端和代理生成。下面就展示一下如何在C#中优雅的调用。
 
 【代理生成】
 
-[获取代理详情](https://blog.csdn.net/qq_40374647/article/details/109143243#:~:text=%E5%B9%B3%E5%8F%B0%E3%80%81%E8%B7%A8%E8%AF%AD%E8%A8%80%EF%BC%89-,%E5%85%AD%E3%80%81%E8%8E%B7%E5%8F%96%E4%BB%A3%E7%90%86,-%E4%BD%BF%E7%94%A8RPC%E7%9A%84)
+> 代理生成的主要作用是显式RPC接口，生成自定义类的相同结构的类。[获取代理详情](https://blog.csdn.net/qq_40374647/article/details/109143243#:~:text=%E5%B9%B3%E5%8F%B0%E3%80%81%E8%B7%A8%E8%AF%AD%E8%A8%80%EF%BC%89-,%E5%85%AD%E3%80%81%E8%8E%B7%E5%8F%96%E4%BB%A3%E7%90%86,-%E4%BD%BF%E7%94%A8RPC%E7%9A%84)
 
+说明：以下代理类XUnitTestServer是由代理工具生成，其结构类似：
+
+
+```
+public interface IXUnitTestServer : IRemoteServer
+{
+    System.Int32 Sum(System.Int32 a, System.Int32 b, InvokeOption invokeOption = null);
+}
+public class XUnitTestServer : IXUnitTestServer
+{
+    public XUnitTestServer(IRpcClient client)
+    {
+        this.Client = client;
+    }
+    public IRpcClient Client { get; private set; }
+    ///<summary>
+    ///<inheritdoc/>
+    ///</summary>
+    public System.Int32 Sum(System.Int32 a, System.Int32 b, InvokeOption invokeOption = null)
+    {
+        if (Client == null)
+        {
+            throw new RRQMRPCException("IRPCClient为空，请先初始化或者进行赋值");
+        }
+        object[] parameters = new object[] { a, b };
+        System.Int32 returnData = Client.Invoke<System.Int32>("Sum", invokeOption, parameters);
+        return returnData;
+    }
+    ///<summary>
+    ///<inheritdoc/>
+    ///</summary>
+    public async Task<System.Int32> SumAsync(System.Int32 a, System.Int32 b, InvokeOption invokeOption = null)
+    {
+       if (Client == null)
+        {
+            throw new RRQMRPCException("RPCClient为空，请先初始化或者进行赋值");
+        }
+        return await Task.Run(() =>
+        {
+            return Sum(a, b, invokeOption);
+        });
+    }
+}
+```
+
+
+
+
+【RRQMRPC-TCP 直接调用】
+
+```
+TcpRpcClient client = new TcpRpcClient();
+var config = new TcpRpcClientConfig();
+config.RemoteIPHost = new IPHost("127.0.0.1:7794");
+
+client.Setup(config);
+client.Connect("123RPC");
+MethodItem[] methodItems = client.DiscoveryService("RPC");
+int result= client.Invoke<int>("Sum", InvokeOption.WaitInvoke, 10, 20);
+
+```
+
+【RRQMRPC-TCP 代理调用】
+```
+TcpRpcClient client = new TcpRpcClient();
+var config = new TcpRpcClientConfig();
+config.RemoteIPHost = new IPHost("127.0.0.1:7794");
+
+client.Setup(config);
+client.Connect("123RPC");
+MethodItem[] methodItems = client.DiscoveryService("RPC");
+XUnitTestServer server = new XUnitTestServer(client);
+int result= server.Sum(10,20);
+
+```
+
+【RRQMRPC-UDP 直接调用】
+```
+UdpRpc client = new UdpRpc();
+var config = new UdpRpcClientConfig();
+config.RemoteIPHost = new IPHost(7797);
+config.BindIPHost = new IPHost(8848);
+
+client.Setup(config);
+client.Start();
+MethodItem[] methodItems = client.DiscoveryService("RPC");
+int result = client.Invoke<int>("Sum", InvokeOption.WaitInvoke, 10, 20);
+
+```
+
+【RRQMRPC-UDP 代理调用】
+
+```
+UdpRpc client = new UdpRpc();
+var config = new UdpRpcClientConfig();
+config.RemoteIPHost = new IPHost(7797);
+config.BindIPHost = new IPHost(8848);
+
+client.Setup(config);
+client.Start();
+MethodItem[] methodItems = client.DiscoveryService("RPC");
+XUnitTestServer server = new XUnitTestServer(client);
+int result = server.Sum(10, 20);
+
+```
+
+【JsonRpc 直接调用】
+
+```
+JsonRpcClient client = new JsonRpcClient();
+var config = new JsonRpcClientConfig();
+config.RemoteIPHost = new IPHost("127.0.0.1:7803");
+config.ProtocolType = JsonRpcProtocolType.Tcp;
+
+client.Setup(config);
+
+client.Connect();
+
+int result = client.Invoke<int>("Sum", InvokeOption.WaitInvoke, 10, 20);
+
+```
+
+【JsonRpc 代理调用】
+
+```
+JsonRpcClient client = new JsonRpcClient();
+var config = new JsonRpcClientConfig();
+config.RemoteIPHost = new IPHost("127.0.0.1:7804");
+config.ProtocolType = JsonRpcProtocolType.Http;
+
+client.Setup(config);
+
+client.Connect();
+
+XUnitTestServer server = new XUnitTestServer(client);
+int result = server.Sum(10, 20);
+
+```
+
+【XmlRpc 直接调用】
+
+```
+XmlRpcClient client = new XmlRpcClient();
+var config = new XmlRpcClientConfig();
+config.RemoteIPHost = new IPHost("127.0.0.1:7802");
+
+client.Setup(config);
+client.Connect();
+
+int result = client.Invoke<int>("Sum", InvokeOption.WaitInvoke, 10, 20);
+
+```
+
+【XmlRpc 代理调用】
+
+```
+XmlRpcClient client = new XmlRpcClient();
+var config = new XmlRpcClientConfig();
+config.RemoteIPHost = new IPHost("127.0.0.1:7802");
+
+client.Setup(config);
+client.Connect();
+
+XUnitTestServer server = new XUnitTestServer(client);
+int result = server.Sum(10, 20);
+
+```
 
 
 
