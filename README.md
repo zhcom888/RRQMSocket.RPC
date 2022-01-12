@@ -55,9 +55,9 @@
 
 ## 🌴 RPC特点速览
 
-#### 【RRQMRPC】
+#### 【RRQMRPC-TCP】
 
-RRQMRPC是基于RRQM自制定协议的RPC组件，也是在RRQMSocket.RPC中最强悍的，其特性：
+RRQMRPC-TCP是基于“TCP+RRQM自制定协议”的RPC组件，也是在RRQMSocket.RPC中最强悍的，其特性：
 
 - 支持**自定义**类型参数。
 - 支持**Ssl**加密调用。
@@ -65,12 +65,26 @@ RRQMRPC是基于RRQM自制定协议的RPC组件，也是在RRQMSocket.RPC中最�
 - 支持**out、ref** 关键字参数。
 - 支持服务器**回调客户端** 。
 - 支持**客户端**之间**相互调用**。
-- 支持TCP、UDP等不同的协议调用相同服务。
 - 支持异步调用。
 - 支持权限管理，让非法调用死在萌芽时期。
 - 支持**静态织入调用**，**静态编译调用**，也支持**方法名+参数**调用。
 - 支持**调用配置**（类似MQTT的AtMostOnce，AtLeastOnce，ExactlyOnce）。
 - **支持EventBus**。
+- 支持**自定义序列化**。
+- **全异常反馈** ，服务器调用状态会完整的反馈到客户端（可以设置不反馈）。
+- 高性能，在保证送达但不返回的情况下，10w次调用用时0.8s，在返回的情况下，用时3.9s。
+
+#### 【RRQMRPC-UDP】
+
+RRQMRPC-UDP是基于“UDP+RRQM自制定协议”的RPC组件，性能和RRQMRPC-TCP一致，但是由于基于原生UDP，所以调用可能会丢失，其特性：
+
+- 支持**自定义**类型参数。
+- 支持具有**默认值**的参数设定。
+- 支持**out、ref** 关键字参数。
+- 支持异步调用。
+- 支持权限管理，让非法调用死在萌芽时期。
+- 支持**静态织入调用**，**静态编译调用**，也支持**方法名+参数**调用。
+- 支持**调用配置**（类似MQTT的AtMostOnce，AtLeastOnce，ExactlyOnce）。
 - 支持**自定义序列化**。
 - **全异常反馈** ，服务器调用状态会完整的反馈到客户端（可以设置不反馈）。
 - 高性能，在保证送达但不返回的情况下，10w次调用用时0.8s，在返回的情况下，用时3.9s。
@@ -126,6 +140,159 @@ JsonRpc解析器是遵循JsonRpc2.0的RPC服务组件，能够让使用者通过
 
  **_更多配置请查看API文档的配置说明文档，一下仅以最简方式创建实例。_** 
 
+【定义服务】
+
+```
+[Route("/[controller]/[action]")]
+public class XUnitTestServer : ControllerBase
+{
+
+    [XmlRpc]
+    [JsonRpc]
+    [Route]
+    [RRQMRPC]
+    public int Sum(int a, int b)
+    {
+        return a + b;
+    }
+}
+```
+【创建RRQMRPC-TCP】
+
+```
+private static IRPCParser CreateRRQMTcpParser(int port)
+{
+    TcpRpcParser tcpRPCParser = new TcpRpcParser();
+
+    //创建配置
+    var config = new TcpRpcParserConfig();
+    config.ListenIPHosts = new IPHost[] { new IPHost(port) };//监听一个IP地址
+    config.ThreadCount = 1;//设置多线程数量
+    config.ClearInterval = -1;//规定不清理无数据客户端
+    config.VerifyTimeout = 3 * 1000;//令箭验证超时时间，3秒
+    config.VerifyToken = "123RPC";//令箭值
+    config.ProxyToken = "RPC";//默认服务代理令箭
+    //载入配置
+    tcpRPCParser.Setup(config);
+
+    //启动服务
+    tcpRPCParser.Start();
+
+    Console.WriteLine($"TCP解析器添加完成，端口号：{port}，VerifyToken={tcpRPCParser.VerifyToken}，ProxyToken={tcpRPCParser.ProxyToken}");
+    return tcpRPCParser;
+}
+
+```
+【创建RRQMRPC-UDP】
+
+```
+private static IRPCParser CreateRRQMUdpParser(int port)
+{
+    UdpRpc udpRPCParser = new UdpRpc();
+    var config = new UdpRpcParserConfig();
+    config.BindIPHost = new IPHost(port);
+    config.BufferLength = 1024;
+    config.ThreadCount = 1;
+    config.ProxyToken = "RPC";
+
+    udpRPCParser.Setup(config);
+
+    udpRPCParser.Start();
+
+    Console.WriteLine($"UDP解析器添加完成，端口号：{port}，ProxyToken={udpRPCParser.ProxyToken}");
+    return udpRPCParser;
+}
+
+```
+【创建JsonRpc】
+
+```
+private static IRPCParser CreateJsonRpcParser(int port, JsonRpcProtocolType protocolType)
+{
+    JsonRpcParser jsonRpcParser = new JsonRpcParser();
+
+    var config = new JsonRpcParserConfig();
+    config.BufferLength = 1024;
+    config.ThreadCount = 1;//设置多线程数量
+    config.ClearInterval = -1;//规定不清理无数据客户端
+    config.ListenIPHosts = new IPHost[] { new IPHost(port) };
+    config.ProtocolType = protocolType;
+    config.ProxyToken = "RPC";
+    jsonRpcParser.Setup(config);
+    jsonRpcParser.Start();
+    Console.WriteLine($"jsonRpcParser解析器添加完成，端口号：{port}，协议：{protocolType}");
+    return jsonRpcParser;
+}
+
+```
+【创建XmlRpc】
+
+```
+private static IRPCParser CreateXmlRpcParser(int port)
+{
+    XmlRpcParser xmlRpcParser = new XmlRpcParser();
+    var config = new XmlRpcParserConfig();
+    config.BufferLength = 1024;
+    config.ThreadCount = 1;//设置多线程数量
+    config.ClearInterval = -1;//规定不清理无数据客户端
+    config.ListenIPHosts = new IPHost[] { new IPHost(port) };
+    config.ProxyToken = "RPC";
+    xmlRpcParser.Setup(config);
+    xmlRpcParser.Start();
+
+    Console.WriteLine($"xmlRpcParser解析器添加完成，端口号：{port}");
+    return xmlRpcParser;
+}
+
+【创建WebApi】
+
+private static IRPCParser CreateWebApiParser(int port, ApiDataConverter dataConverter)
+{
+    WebApiParser webApiParser = new WebApiParser();
+    var config = new WebApiParserConfig();
+    config.BufferLength = 1024;
+    config.ThreadCount = 1;//设置多线程数量
+    config.ClearInterval = -1;//规定不清理无数据客户端
+    config.ListenIPHosts = new IPHost[] { new IPHost(port) };
+    config.ApiDataConverter = dataConverter;
+    webApiParser.Setup(config);
+    webApiParser.Start();
+    Console.WriteLine($"webApiParser解析器添加完成，端口号：{port}，序列化器：{dataConverter.GetType().Name}");
+    return webApiParser;
+}
+
+```
+
+【服务注册与启动】
+
+```
+RPCService rpcService = new RPCService();
+
+rpcService.AddRPCParser("tcpRPCParser", CreateRRQMTcpParser(7794));
+
+rpcService.AddRPCParser("udpRPCParser", CreateRRQMUdpParser(7797));
+
+rpcService.AddRPCParser("webApiParser_Xml", CreateWebApiParser(7800, new XmlDataConverter()));
+rpcService.AddRPCParser("webApiParser_Json", CreateWebApiParser(7801, new JsonDataConverter()));
+
+rpcService.AddRPCParser("xmlRpcParser", CreateXmlRpcParser(7802));
+
+rpcService.AddRPCParser("JsonRpcParser_Tcp", CreateJsonRpcParser(7803, JsonRpcProtocolType.Tcp));
+rpcService.AddRPCParser("JsonRpcParser_Http", CreateJsonRpcParser(7804, JsonRpcProtocolType.Http));
+rpcService.RegisterServer<XUnitTestServer>();//注册服务
+
+
+foreach (var item in ((WebApiParser)rpcService.RPCParsers["webApiParser_Xml"]).RouteMap.Urls)
+{
+    Console.WriteLine($"使用：http://127.0.0.1:7800" + item);
+}
+
+foreach (var item in ((WebApiParser)rpcService.RPCParsers["webApiParser_Json"]).RouteMap.Urls)
+{
+    Console.WriteLine($"使用：http://127.0.0.1:7801" + item);
+}
+
+```
 
 
 
