@@ -11,10 +11,8 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace RRQMSocket.RPC
 {
@@ -71,7 +69,7 @@ namespace RRQMSocket.RPC
                 codeString.AppendLine("///</summary>");
             }
 
-            if (methodInstance.ReturnType==null)
+            if (methodInstance.ReturnType == null)
             {
                 codeString.Append(string.Format("  void {0} ", methodName));
             }
@@ -153,7 +151,7 @@ namespace RRQMSocket.RPC
                     codeString.AppendLine("///</summary>");
                 }
 
-                if (methodInstance.ReturnType==null)
+                if (methodInstance.ReturnType == null)
                 {
                     codeString.Append(string.Format("void {0} ", methodName + "Async"));
                 }
@@ -220,7 +218,7 @@ namespace RRQMSocket.RPC
             codeString.AppendLine("///<summary>");
             codeString.AppendLine("///<inheritdoc/>");
             codeString.AppendLine("///</summary>");
-            if (methodInstance.ReturnType==null)
+            if (methodInstance.ReturnType == null)
             {
                 isReturn = false;
                 codeString.Append(string.Format("public  void {0} ", methodName));
@@ -405,7 +403,7 @@ namespace RRQMSocket.RPC
                 codeString.AppendLine("///<summary>");
                 codeString.AppendLine("///<inheritdoc/>");
                 codeString.AppendLine("///</summary>");
-                if (methodInstance.ReturnType==null)
+                if (methodInstance.ReturnType == null)
                 {
                     isReturn = false;
                     codeString.Append(string.Format("public  async void {0} ", methodName + "Async"));

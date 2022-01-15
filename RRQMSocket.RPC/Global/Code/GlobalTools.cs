@@ -9,7 +9,6 @@
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-using RRQMCore;
 using RRQMCore.Helper;
 using System;
 using System.Collections.Generic;
@@ -91,7 +90,7 @@ namespace RRQMSocket.RPC
                     {
                         if (item.Async)
                         {
-                            methodInstance.AsyncType |=  AsyncType.Async;
+                            methodInstance.AsyncType |= AsyncType.Async;
                         }
                         methodInstance.MethodFlags |= item.MethodFlags;
                     }

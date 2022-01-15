@@ -10,11 +10,6 @@
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 using RRQMCore.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RRQMSocket.RPC.RRQMRPC
 {
@@ -49,6 +44,5 @@ namespace RRQMSocket.RPC.RRQMRPC
         /// <exception cref="RRQMException"></exception>
         /// <returns></returns>
         public T Invoke<T>(string id, string method, InvokeOption invokeOption, params object[] parameters);
-
     }
 }

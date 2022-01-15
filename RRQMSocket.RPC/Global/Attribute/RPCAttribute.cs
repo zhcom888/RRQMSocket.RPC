@@ -56,7 +56,6 @@ namespace RRQMSocket.RPC
             this.MethodName = methodName;
         }
 
-
         /// <summary>
         /// 异步执行。
         /// </summary>
@@ -68,7 +67,7 @@ namespace RRQMSocket.RPC
         public MethodFlags MethodFlags
         {
             get { return methodFlags; }
-            set { methodFlags=value; }
+            set { methodFlags = value; }
         }
 
         /// <summary>

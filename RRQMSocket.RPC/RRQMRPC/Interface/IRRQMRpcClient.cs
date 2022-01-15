@@ -39,6 +39,6 @@ namespace RRQMSocket.RPC.RRQMRPC
         /// <param name="proxyToken">代理令箭</param>
         /// <param name="token"></param>
         /// <returns>发现的服务</returns>
-        MethodItem[] DiscoveryService(string proxyToken,System.Threading.CancellationToken token=default);
+        MethodItem[] DiscoveryService(string proxyToken, System.Threading.CancellationToken token = default);
     }
 }
