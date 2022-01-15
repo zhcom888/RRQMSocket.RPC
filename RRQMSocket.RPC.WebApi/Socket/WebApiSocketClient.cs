@@ -9,7 +9,6 @@
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-using RRQMCore.Exceptions;
 
 namespace RRQMSocket.RPC.WebApi
 {
@@ -21,7 +20,7 @@ namespace RRQMSocket.RPC.WebApi
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public sealed override bool CanSetDataHandlingAdapter => false;
+        public override sealed bool CanSetDataHandlingAdapter => false;
 
         internal void InternalSetAdapter(DataHandlingAdapter adapter)
         {

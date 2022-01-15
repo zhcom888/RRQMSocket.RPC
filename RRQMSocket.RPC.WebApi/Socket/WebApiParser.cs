@@ -287,7 +287,6 @@ namespace RRQMSocket.RPC.WebApi
         /// <param name="args"></param>
         public void GetProxyInfo(GetProxyInfoArgs args)
         {
-            
         }
     }
 }
