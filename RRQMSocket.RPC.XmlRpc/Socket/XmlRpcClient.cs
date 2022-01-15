@@ -155,15 +155,15 @@ namespace RRQMSocket.RPC.XmlRpc
         {
             throw new RRQMException($"{nameof(XmlRpcSocketClient)}不允许设置适配器。");
         }
-      
+
         /// <summary>
         /// 处理数据
         /// </summary>
         /// <param name="byteBlock"></param>
-        /// <param name="obj"></param>
-        protected override void HandleReceivedData(ByteBlock byteBlock, object obj)
+        /// <param name="requestInfo"></param>
+        protected override void HandleReceivedData(ByteBlock byteBlock, IRequestInfo requestInfo)
         {
-            this.singleWaitHandle.Set((HttpResponse)obj);
+            this.singleWaitHandle.Set((HttpResponse)requestInfo);
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace RRQMSocket.RPC.XmlRpc
             base.SetAdapter(new HttpDataHandlingAdapter(this.maxPackageSize, HttpType.Client));
             base.OnConnecting(e);
         }
-        
+
         private HttpResponse WaitSend(ByteBlock byteBlock)
         {
             lock (this)
