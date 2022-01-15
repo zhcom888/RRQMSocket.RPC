@@ -18,16 +18,13 @@ using RRQMCore.Serialization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RRQMSocket.RPC.RRQMRPC
 {
     /// <summary>
     /// TcpRPCClient
     /// </summary>
-    public class TcpRpcClient : ProtocolClient, IRRQMRpcClient, IRPCParser, ICaller, IIDInvoke
+    public class TcpRpcClient : ProtocolClient, IRRQMRpcClient,  IRPCParser, ICaller, IIDInvoke
     {
         private ConcurrentDictionary<string, MethodInstance> callbackMap;
         private ConcurrentDictionary<int, RpcCallContext> contextDic;
@@ -130,6 +127,7 @@ namespace RRQMSocket.RPC.RRQMRPC
         {
             get { return serverProviders; }
         }
+
         #endregion 属性
 
         /// <summary>
@@ -178,6 +176,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             throw new RRQMTimeoutException("操作超时。");
                         case WaitDataStatus.Canceled:
                             return null;
+
                         case WaitDataStatus.Default:
                         case WaitDataStatus.Disposed:
                         default:
@@ -188,7 +187,6 @@ namespace RRQMSocket.RPC.RRQMRPC
                 {
                     this.WaitHandlePool.Destroy(waitData);
                 }
-
             }
         }
 
@@ -486,6 +484,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             {
                                 case WaitDataStatus.SetRunning:
                                     break;
+
                                 case WaitDataStatus.Overtime:
                                     {
                                         throw new RRQMTimeoutException("等待结果超时");
@@ -686,6 +685,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             {
                                 case WaitDataStatus.SetRunning:
                                     break;
+
                                 case WaitDataStatus.Overtime:
                                     {
                                         throw new RRQMTimeoutException("等待结果超时");
@@ -1088,6 +1088,19 @@ namespace RRQMSocket.RPC.RRQMRPC
                         {
                             Logger.Debug(LogType.Error, this, $"错误代码: {procotol}, 错误详情:{ex.Message}");
                         }
+                        break;
+                    }
+                case 106:
+                case 107:
+                case 108:
+                case 109:
+                case 111:
+                    {
+                        break;
+                    }
+
+                case 110:
+                    {
                         break;
                     }
                 case 113:

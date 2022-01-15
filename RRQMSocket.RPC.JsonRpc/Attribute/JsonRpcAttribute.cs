@@ -19,6 +19,5 @@ namespace RRQMSocket.RPC.JsonRpc
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public sealed class JsonRpcAttribute : RPCAttribute
     {
-
     }
 }

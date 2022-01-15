@@ -211,6 +211,36 @@ namespace RRQMSocket.RPC.RRQMRPC
                         }
                         break;
                     }
+                case 106:/*发布事件*/
+                    {
+                        break;
+                    }
+                case 107:/*取消发布事件*/
+                    {
+                       
+                        break;
+                    }
+                case 108:/*订阅事件*/
+                    {
+                        
+                        break;
+                    }
+                case 109:/*触发事件*/
+                    {
+                        
+                        break;
+                    }
+                case 111:/*获取所有事件*/
+                    {
+                        
+                        break;
+                    }
+
+                case 112:/*取消订阅*/
+                    {
+                       
+                        break;
+                    }
                 default:
                     RPCHandleDefaultData(procotol, byteBlock);
                     break;
@@ -278,7 +308,7 @@ namespace RRQMSocket.RPC.RRQMRPC
                             methodInvoker.AsyncRun = true;
 
                             ps = new object[methodInstance.ParameterTypes.Length];
-                          
+
                             RpcCallContext callContext = new RpcCallContext(this, context, methodInstance, methodInvoker);
                             this.contextDic.TryAdd(context.Sign, callContext);
 

@@ -73,6 +73,7 @@ namespace RRQMSocket.RPC.JsonRpc
         }
 
         private string proxyToken;
+
         /// <summary>
         /// 代理令箭，当获取代理文件时需验证令箭
         /// </summary>
@@ -80,7 +81,6 @@ namespace RRQMSocket.RPC.JsonRpc
         {
             get { return proxyToken; }
         }
-
 
         /// <summary>
         /// 所属服务器
@@ -461,7 +461,7 @@ namespace RRQMSocket.RPC.JsonRpc
             switch (this.protocolType)
             {
                 case JsonRpcProtocolType.Tcp:
-                    socketClient.InternalSetAdapter(new TerminatorDataHandlingAdapter(this.maxPackageSize, "\r\n"));
+                    socketClient.InternalSetAdapter(new TerminatorPackageAdapter(this.maxPackageSize, "\r\n"));
                     break;
 
                 case JsonRpcProtocolType.Http:

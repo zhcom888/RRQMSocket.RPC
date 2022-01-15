@@ -50,9 +50,9 @@ namespace RRQMSocket.RPC.RRQMRPC
         /// </summary>
         public CancellationTokenSource TokenSource
         {
-            get 
+            get
             {
-                if (this.tokenSource==null)
+                if (this.tokenSource == null)
                 {
                     this.tokenSource = new CancellationTokenSource();
                 }

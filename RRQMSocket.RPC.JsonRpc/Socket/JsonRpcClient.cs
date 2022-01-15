@@ -16,7 +16,6 @@ using RRQMCore.Run;
 using RRQMCore.XREF.Newtonsoft.Json;
 using RRQMCore.XREF.Newtonsoft.Json.Linq;
 using RRQMSocket.Http;
-using RRQMSocket.RPC.RRQMRPC;
 using System;
 using System.Text;
 
@@ -314,8 +313,8 @@ namespace RRQMSocket.RPC.JsonRpc
         /// 处理数据
         /// </summary>
         /// <param name="byteBlock"></param>
-        /// <param name="obj"></param>
-        protected override void HandleReceivedData(ByteBlock byteBlock, object obj)
+        /// <param name="requestInfo"></param>
+        protected override void HandleReceivedData(ByteBlock byteBlock, IRequestInfo requestInfo)
         {
             switch (this.protocolType)
             {
@@ -337,7 +336,7 @@ namespace RRQMSocket.RPC.JsonRpc
 
                 case JsonRpcProtocolType.Http:
                     {
-                        HttpResponse httpResponse = (HttpResponse)obj;
+                        HttpResponse httpResponse = (HttpResponse)requestInfo;
                         JsonResponseContext responseContext = (JsonResponseContext)JsonConvert.DeserializeObject(httpResponse.Body, typeof(JsonResponseContext));
                         if (responseContext != null)
                         {
@@ -382,7 +381,7 @@ namespace RRQMSocket.RPC.JsonRpc
             switch (this.protocolType)
             {
                 case JsonRpcProtocolType.Tcp:
-                    base.SetAdapter(new TerminatorDataHandlingAdapter(this.maxPackageSize, "\r\n"));
+                    base.SetAdapter(new TerminatorPackageAdapter(this.maxPackageSize, "\r\n"));
                     break;
 
                 case JsonRpcProtocolType.Http:

@@ -58,7 +58,7 @@ namespace RRQMSocket.RPC
         {
             return this.propertyDic.Values.ToArray();
         }
-       
+
         /// <summary>
         /// 获取类型全名
         /// </summary>
@@ -217,7 +217,7 @@ namespace RRQMSocket.RPC
                     stringBuilder.AppendLine("}");
                     if (!propertyDic.ContainsKey(type))
                     {
-                        propertyDic.Add(type,new ClassCellCode() { Name=type.Name,Code= stringBuilder.ToString() });
+                        propertyDic.Add(type, new ClassCellCode() { Name = type.Name, Code = stringBuilder.ToString() });
                     }
                 }
                 else

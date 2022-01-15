@@ -69,6 +69,7 @@ namespace RRQMSocket.RPC.XmlRpc
         /// 所属服务器
         /// </summary>
         public RPCService RPCService { get; private set; }
+
         /// <summary>
         /// 执行函数
         /// </summary>
@@ -84,7 +85,7 @@ namespace RRQMSocket.RPC.XmlRpc
             {
                 if (args.ProxyToken != this.ProxyToken)
                 {
-                    args.ErrorMessage = "在验证RRQMRPC时令箭不正确。";
+                    args.ErrorMessage = "在验证XmlRpc时令箭不正确。";
                     args.IsSuccess = false;
                     return;
                 }

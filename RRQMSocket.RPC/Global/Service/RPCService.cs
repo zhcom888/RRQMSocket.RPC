@@ -13,7 +13,6 @@ using RRQMCore;
 using RRQMCore.ByteManager;
 using RRQMCore.Exceptions;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,7 +25,7 @@ namespace RRQMSocket.RPC
     /// </summary>
     public class RPCService : IDisposable
     {
-        private SimpleProtocolService service;
+        private ProtocolService service;
 
         /// <summary>
         /// 构造函数
@@ -136,7 +135,7 @@ namespace RRQMSocket.RPC
             SimpleProtocolClient client = new SimpleProtocolClient();
             client.Connecting += (client, e) =>
             {
-                e.DataHandlingAdapter = new FixedHeaderDataHandlingAdapter();
+                e.DataHandlingAdapter = new FixedHeaderPackageAdapter();
             };
             ByteBlock byteBlock = new ByteBlock();
             try
@@ -144,7 +143,7 @@ namespace RRQMSocket.RPC
                 ProtocolClientConfig config = new ProtocolClientConfig();
                 config.RemoteIPHost = iPHost;
                 client.Setup(config).Connect();
-                WaitSenderSubscriber subscriber = new WaitSenderSubscriber(100) {  Timeout=3*1000};
+                WaitSenderSubscriber subscriber = new WaitSenderSubscriber(100) { Timeout = 3 * 1000 };
                 client.AddProtocolSubscriber(subscriber);
 
                 byteBlock.Write((int)rpcType);
@@ -267,10 +266,10 @@ namespace RRQMSocket.RPC
             {
                 return;
             }
-            this.service = new SimpleProtocolService();
-            this.service.Connecting += (client,e) =>
+            this.service = new ProtocolService();
+            this.service.Connecting += (client, e) =>
             {
-                e.DataHandlingAdapter = new FixedHeaderDataHandlingAdapter();
+                e.DataHandlingAdapter = new FixedHeaderPackageAdapter();
             };
             this.service.Received += Service_Received;
             this.service.Setup(new ProtocolServiceConfig() { ListenIPHosts = new IPHost[] { iPHost } });
@@ -449,7 +448,7 @@ namespace RRQMSocket.RPC
                     };
                 }
             }
-            return new RpcProxyInfo() { IsSuccess = true,Version=this.Version, Namespace=this.NameSpace, Codes = args.Codes.ToArray() };
+            return new RpcProxyInfo() { IsSuccess = true, Version = this.Version, Namespace = this.NameSpace, Codes = args.Codes.ToArray() };
         }
 
         private void PreviewExecuteMethod(IRPCParser parser, MethodInvoker methodInvoker, MethodInstance methodInstance)

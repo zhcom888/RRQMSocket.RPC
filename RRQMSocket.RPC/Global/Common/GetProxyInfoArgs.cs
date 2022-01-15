@@ -53,7 +53,7 @@ namespace RRQMSocket.RPC
         }
 
         private List<ServerCellCode> codes;
-        
+
         /// <summary>
         /// Rpc代理类
         /// </summary>
@@ -61,7 +61,6 @@ namespace RRQMSocket.RPC
         {
             get { return codes; }
         }
-
 
         /// <summary>
         /// Rpc类型

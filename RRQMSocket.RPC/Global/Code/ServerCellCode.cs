@@ -9,11 +9,7 @@
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RRQMSocket.RPC
 {
@@ -30,16 +26,19 @@ namespace RRQMSocket.RPC
             this.methods = new Dictionary<string, MethodCellCode>();
             this.classCellCodes = new Dictionary<string, ClassCellCode>();
         }
+
         /// <summary>
         /// 服务名
         /// </summary>
         public string Name { get; set; }
 
 #if NET45_OR_GREATER
+
         /// <summary>
         /// 引用
         /// </summary>
         public string[] Refs { get; set; }
+
 #endif
 
         private Dictionary<string, MethodCellCode> methods;
@@ -54,7 +53,7 @@ namespace RRQMSocket.RPC
         }
 
         private Dictionary<string, ClassCellCode> classCellCodes;
-       
+
         /// <summary>
         /// 类参数集合。
         /// </summary>
@@ -63,6 +62,5 @@ namespace RRQMSocket.RPC
             get { return classCellCodes; }
             set { classCellCodes = value; }
         }
-
     }
 }
