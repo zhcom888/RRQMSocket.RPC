@@ -89,20 +89,13 @@ namespace RRQMSocket.RPC
             else if (type.IsArray)
             {
                 Type elementType = type.GetElementType();
-                return this.GetTypeFullName(elementType) + "[]";
+                return this.GetTypeFullName(elementType) + type.Name.Replace(elementType.Name, string.Empty);
             }
-
-            if (type.IsByRef)
+            else if (type.IsByRef)
             {
-                string typeName = type.FullName.Replace("&", string.Empty);
-                type = Type.GetType(typeName);
-                if (type == null && assembly != null)
-                {
-                    type = assembly.GetType(typeName);
-                }
+                return this.GetTypeFullName(type.GetElementType());
             }
-
-            if (type.IsPrimitive || type == typeof(string))
+            else if (type.IsPrimitive || type == typeof(string))
             {
                 return type.FullName;
             }
@@ -112,13 +105,14 @@ namespace RRQMSocket.RPC
             }
             else if (propertyDic.ContainsKey(type))
             {
-                return type.Name;
+                return propertyDic[type].Name;
             }
             else
             {
                 return type.FullName;
             }
-        }
+
+        } 
 
         internal void AddTypeString(Type type)
         {
