@@ -25,11 +25,13 @@ namespace RRQMSocket.RPC.JsonRpc
     /// </summary>
     public class JsonRpcParser : TcpService<JsonRpcSocketClient>, IRPCParser
     {
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<Type, IServerProvider>> idTypeInstance;
         private ActionMap actionMap;
-
+        private InvokeType invokeType;
+        private int maxPackageSize;
         private MethodMap methodMap;
-
         private JsonRpcProtocolType protocolType;
+        private string proxyToken;
 
         /// <summary>
         /// 构造函数
@@ -45,8 +47,13 @@ namespace RRQMSocket.RPC.JsonRpc
         /// </summary>
         public ActionMap ActionMap
         { get { return this.actionMap; } }
-
-        private int maxPackageSize;
+        /// <summary>
+        /// 调用类型
+        /// </summary>
+        public InvokeType InvokeType
+        {
+            get { return invokeType; }
+        }
 
         /// <summary>
         /// 最大数据包长度
@@ -71,9 +78,7 @@ namespace RRQMSocket.RPC.JsonRpc
         {
             get { return protocolType; }
         }
-
-        private string proxyToken;
-
+        
         /// <summary>
         /// 代理令箭，当获取代理文件时需验证令箭
         /// </summary>
@@ -86,21 +91,32 @@ namespace RRQMSocket.RPC.JsonRpc
         /// 所属服务器
         /// </summary>
         public RPCService RPCService { get; private set; }
-
-        private InvokeType invokeType;
-
-        /// <summary>
-        /// 调用类型
-        /// </summary>
-        public InvokeType InvokeType
-        {
-            get { return invokeType; }
-        }
-
         /// <summary>
         /// 执行函数
         /// </summary>
         public Action<IRPCParser, MethodInvoker, MethodInstance> RRQMExecuteMethod { get; private set; }
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <param name="args"></param>
+        public void GetProxyInfo(GetProxyInfoArgs args)
+        {
+            if (args.RpcType.HasFlag(RpcType.JsonRpc))
+            {
+                if (args.ProxyToken != this.ProxyToken)
+                {
+                    args.ErrorMessage = "在验证JsonRpc时令箭不正确。";
+                    args.IsSuccess = false;
+                    return;
+                }
+                foreach (var item in this.RPCService.ServerProviders)
+                {
+                    var serverCellCode = CodeGenerator.Generator<JsonRpcAttribute>(item.GetType());
+                    args.Codes.Add(serverCellCode);
+                }
+            }
+        }
 
         /// <summary>
         /// 结束调用
@@ -470,9 +486,7 @@ namespace RRQMSocket.RPC.JsonRpc
             }
             base.OnConnecting(socketClient, e);
         }
-
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<Type, IServerProvider>> idTypeInstance;
-
+        
         private void OnReceived(SimpleSocketClient socketClient, ByteBlock byteBlock, object obj)
         {
             MethodInvoker methodInvoker = new MethodInvoker();
@@ -541,28 +555,6 @@ namespace RRQMSocket.RPC.JsonRpc
             methodInvoker.Flag = context;
 
             this.RRQMExecuteMethod.Invoke(this, methodInvoker, methodInstance);
-        }
-
-        /// <summary>
-        /// <inheritdoc/>
-        /// </summary>
-        /// <param name="args"></param>
-        public void GetProxyInfo(GetProxyInfoArgs args)
-        {
-            if (args.RpcType.HasFlag(RpcType.JsonRpc))
-            {
-                if (args.ProxyToken != this.ProxyToken)
-                {
-                    args.ErrorMessage = "在验证JsonRpc时令箭不正确。";
-                    args.IsSuccess = false;
-                    return;
-                }
-                foreach (var item in this.RPCService.ServerProviders)
-                {
-                    var serverCellCode = CodeGenerator.Generator<JsonRpcAttribute>(item.GetType());
-                    args.Codes.Add(serverCellCode);
-                }
-            }
         }
     }
 }
