@@ -25,6 +25,7 @@ namespace RRQMSocket.RPC
         /// </summary>
         public RPCAttribute()
         {
+            this.async = true;
         }
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace RRQMSocket.RPC
         public RPCAttribute(MethodFlags methodFlags)
         {
             this.methodFlags = methodFlags;
+            this.async = true;
         }
 
         /// <summary>
@@ -45,6 +47,7 @@ namespace RRQMSocket.RPC
         {
             this.MethodName = methodName;
             this.methodFlags = methodFlags;
+            this.async = true;
         }
 
         /// <summary>
@@ -54,12 +57,18 @@ namespace RRQMSocket.RPC
         public RPCAttribute(string methodName)
         {
             this.MethodName = methodName;
+            this.async = true;
         }
 
+        private bool async;
         /// <summary>
-        /// 异步执行。
+        /// 异步执行(默认True)。
         /// </summary>
-        public bool Async { get; set; }
+        public bool Async
+        {
+            get { return async; }
+            set { async = value; }
+        }
 
         /// <summary>
         /// 函数标识

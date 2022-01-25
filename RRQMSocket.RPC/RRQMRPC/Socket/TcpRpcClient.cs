@@ -24,7 +24,7 @@ namespace RRQMSocket.RPC.RRQMRPC
     /// <summary>
     /// TcpRPCClient
     /// </summary>
-    public class TcpRpcClient : ProtocolClient, IRRQMRpcClient,  IRPCParser, ICaller, IIDInvoke
+    public class TcpRpcClient : ProtocolClient, IRRQMRpcClient, IRPCParser, ICaller, IIDInvoke
     {
         private ConcurrentDictionary<string, MethodInstance> callbackMap;
         private ConcurrentDictionary<int, RpcCallContext> contextDic;
