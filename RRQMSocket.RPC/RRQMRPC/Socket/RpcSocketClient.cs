@@ -217,28 +217,23 @@ namespace RRQMSocket.RPC.RRQMRPC
                     }
                 case 107:/*取消发布事件*/
                     {
-                       
                         break;
                     }
                 case 108:/*订阅事件*/
                     {
-                        
                         break;
                     }
                 case 109:/*触发事件*/
                     {
-                        
                         break;
                     }
                 case 111:/*获取所有事件*/
                     {
-                        
                         break;
                     }
 
                 case 112:/*取消订阅*/
                     {
-                       
                         break;
                     }
                 default:

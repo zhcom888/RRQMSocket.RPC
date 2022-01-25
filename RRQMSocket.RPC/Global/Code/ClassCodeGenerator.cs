@@ -112,7 +112,7 @@ namespace RRQMSocket.RPC
                 return type.FullName;
             }
 
-        } 
+        }
 
         internal void AddTypeString(Type type)
         {
@@ -216,93 +216,107 @@ namespace RRQMSocket.RPC
                 }
                 else
                 {
-                    if (type.Assembly == assembly || CodeGenerator.ContainsType(type))
+                    string className;
+                    if (type.GetCustomAttribute<RRQMProxyAttribute>() is RRQMProxyAttribute attribute)
                     {
-                        StringBuilder stringBuilder = new StringBuilder();
+                        className = attribute.ClassName;
+                    }
+                    else if (CodeGenerator.TryGetProxyTypeName(type, out className))
+                    {
 
-                        stringBuilder.AppendLine("");
-                        if (type.IsStruct())
+                    }
+                    else if (type.Assembly == this.assembly)
+                    {
+                        className = type.Name;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    stringBuilder.AppendLine("");
+                    if (type.IsStruct())
+                    {
+                        stringBuilder.AppendLine($"public struct {className}");
+                    }
+                    else
+                    {
+                        stringBuilder.AppendLine($"public class {className}");
+                    }
+
+                    if (!type.IsStruct() && type.BaseType != typeof(object))
+                    {
+                        AddTypeString(type.BaseType);
+                        if (type.BaseType.IsGenericType)
                         {
-                            stringBuilder.AppendLine($"public struct {type.Name}");
+                            Type[] types = type.BaseType.GetGenericArguments();
+                            foreach (Type itemType in types)
+                            {
+                                AddTypeString(itemType);
+                            }
+                            if (listType.Contains(type.BaseType.Name))
+                            {
+                                string typeString = this.GetTypeFullName(types[0]);
+                                stringBuilder.Append($":{type.BaseType.Name.Replace("`1", string.Empty)}<{typeString}>");
+                            }
+                            else if (dicType.Contains(type.BaseType.Name))
+                            {
+                                string keyString = this.GetTypeFullName(types[0]);
+                                string valueString = this.GetTypeFullName(types[1]);
+                                stringBuilder.Append($": {type.BaseType.Name.Replace("`2", string.Empty)}<{keyString},{valueString}>");
+                            }
+                        }
+                        else if (type.BaseType.IsClass)
+                        {
+                            stringBuilder.AppendLine($": {this.GetTypeFullName(type.BaseType)}");
+                        }
+                    }
+
+                    stringBuilder.AppendLine("{");
+                    PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.GetProperty | BindingFlags.SetProperty);
+
+                    foreach (PropertyInfo itemProperty in propertyInfos)
+                    {
+                        AddTypeString(itemProperty.PropertyType);
+                        if (propertyDic.ContainsKey(itemProperty.PropertyType))
+                        {
+                            stringBuilder.Append($"public {itemProperty.PropertyType.Name} {itemProperty.Name}");
+                        }
+                        else if (itemProperty.PropertyType.IsGenericType)
+                        {
+                            Type[] types = itemProperty.PropertyType.GetGenericArguments();
+                            foreach (Type itemType in types)
+                            {
+                                AddTypeString(itemType);
+                            }
+
+                            if (listType.Contains(itemProperty.PropertyType.Name))
+                            {
+                                string typeString = this.GetTypeFullName(types[0]);
+                                stringBuilder.Append($"public {itemProperty.PropertyType.Name.Replace("`1", string.Empty)}<{typeString}> {itemProperty.Name}");
+                            }
+                            else if (dicType.Contains(itemProperty.PropertyType.Name))
+                            {
+                                string keyString = this.GetTypeFullName(types[0]);
+                                string valueString = this.GetTypeFullName(types[1]);
+                                stringBuilder.Append($"public {itemProperty.PropertyType.Name.Replace("`2", string.Empty)}<{keyString},{valueString}> {itemProperty.Name}");
+                            }
                         }
                         else
                         {
-                            stringBuilder.AppendLine($"public class {type.Name}");
-                        }
-
-                        if (!type.IsStruct() && type.BaseType != typeof(object))
-                        {
-                            AddTypeString(type.BaseType);
-                            if (type.BaseType.IsGenericType)
-                            {
-                                Type[] types = type.BaseType.GetGenericArguments();
-                                foreach (Type itemType in types)
-                                {
-                                    AddTypeString(itemType);
-                                }
-                                if (listType.Contains(type.BaseType.Name))
-                                {
-                                    string typeString = this.GetTypeFullName(types[0]);
-                                    stringBuilder.Append($":{type.BaseType.Name.Replace("`1", string.Empty)}<{typeString}>");
-                                }
-                                else if (dicType.Contains(type.BaseType.Name))
-                                {
-                                    string keyString = this.GetTypeFullName(types[0]);
-                                    string valueString = this.GetTypeFullName(types[1]);
-                                    stringBuilder.Append($": {type.BaseType.Name.Replace("`2", string.Empty)}<{keyString},{valueString}>");
-                                }
-                            }
-                            else if (type.BaseType.IsClass)
-                            {
-                                stringBuilder.AppendLine($": {this.GetTypeFullName(type.BaseType)}");
-                            }
-                        }
-
-                        stringBuilder.AppendLine("{");
-                        PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.GetProperty | BindingFlags.SetProperty);
-
-                        foreach (PropertyInfo itemProperty in propertyInfos)
-                        {
                             AddTypeString(itemProperty.PropertyType);
-                            if (propertyDic.ContainsKey(itemProperty.PropertyType))
-                            {
-                                stringBuilder.Append($"public {itemProperty.PropertyType.Name} {itemProperty.Name}");
-                            }
-                            else if (itemProperty.PropertyType.IsGenericType)
-                            {
-                                Type[] types = itemProperty.PropertyType.GetGenericArguments();
-                                foreach (Type itemType in types)
-                                {
-                                    AddTypeString(itemType);
-                                }
-
-                                if (listType.Contains(itemProperty.PropertyType.Name))
-                                {
-                                    string typeString = this.GetTypeFullName(types[0]);
-                                    stringBuilder.Append($"public {itemProperty.PropertyType.Name.Replace("`1", string.Empty)}<{typeString}> {itemProperty.Name}");
-                                }
-                                else if (dicType.Contains(itemProperty.PropertyType.Name))
-                                {
-                                    string keyString = this.GetTypeFullName(types[0]);
-                                    string valueString = this.GetTypeFullName(types[1]);
-                                    stringBuilder.Append($"public {itemProperty.PropertyType.Name.Replace("`2", string.Empty)}<{keyString},{valueString}> {itemProperty.Name}");
-                                }
-                            }
-                            else
-                            {
-                                AddTypeString(itemProperty.PropertyType);
-                                stringBuilder.Append($"public {itemProperty.PropertyType.FullName} {itemProperty.Name}");
-                            }
-
-                            stringBuilder.AppendLine("{get;set;}");
+                            stringBuilder.Append($"public {itemProperty.PropertyType.FullName} {itemProperty.Name}");
                         }
 
-                        stringBuilder.AppendLine("}");
+                        stringBuilder.AppendLine("{get;set;}");
+                    }
 
-                        if (!propertyDic.ContainsKey(type))
-                        {
-                            propertyDic.Add(type, new ClassCellCode() { Name = type.Name, Code = stringBuilder.ToString() });
-                        }
+                    stringBuilder.AppendLine("}");
+
+                    if (!propertyDic.ContainsKey(type))
+                    {
+                        propertyDic.Add(type, new ClassCellCode() { Name = className, Code = stringBuilder.ToString() });
                     }
                 }
             }

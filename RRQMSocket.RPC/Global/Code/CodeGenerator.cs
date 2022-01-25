@@ -25,7 +25,7 @@ namespace RRQMSocket.RPC
     /// </summary>
     public static class CodeGenerator
     {
-        private static List<Type> proxyType = new List<Type>();
+        private static Dictionary<Type, string> proxyType = new Dictionary<Type, string>();
 
         /// <summary>
         /// 是否包含类型
@@ -34,7 +34,18 @@ namespace RRQMSocket.RPC
         /// <returns></returns>
         public static bool ContainsType(Type type)
         {
-            return proxyType.Contains(type);
+            return proxyType.ContainsKey(type);
+        }
+
+        /// <summary>
+        /// 获取类型代理名称
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="className"></param>
+        /// <returns></returns>
+        public static bool TryGetProxyTypeName(Type type,out string className)
+        {
+            return proxyType.TryGetValue(type,out className);
         }
 
         /// <summary>
@@ -48,9 +59,10 @@ namespace RRQMSocket.RPC
             {
                 return;
             }
-            if (!proxyType.Contains(type))
+            if (!proxyType.ContainsKey(type))
             {
-                proxyType.Add(type);
+                RRQMProxyAttribute attribute = type.GetCustomAttribute<RRQMProxyAttribute>();
+                proxyType.Add(type, attribute == null ? type.Name : attribute.ClassName);
                 if (deepSearch)
                 {
                     PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);

@@ -21,7 +21,7 @@ namespace RRQMSocket.RPC.RRQMRPC
     /// TcpRPCParser泛型类型
     /// </summary>
     /// <typeparam name="TClient"></typeparam>
-    public class TcpParser<TClient> : ProtocolService<TClient>, IRPCParser,  IIDInvoke,  IRRQMRpcParser where TClient : RpcSocketClient, new()
+    public class TcpParser<TClient> : ProtocolService<TClient>, IRPCParser, IIDInvoke, IRRQMRpcParser where TClient : RpcSocketClient, new()
     {
         private MethodStore methodStore;
         private SerializationSelector serializationSelector;
