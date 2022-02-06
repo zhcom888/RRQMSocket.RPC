@@ -38,6 +38,15 @@
 | [![NuGet version (RRQMSocket.Http)](https://img.shields.io/nuget/v/RRQMSocket.Http.svg?label=RRQMSocket.Http)](https://www.nuget.org/packages/rrqmsocket.http)|[Gitee](https://gitee.com/dotnetchina/RRQMSocket)<br>[Github](https://github.com/RRQM/RRQMSocket)  |  RRQMSocket.Http是一个能够简单解析Http的服务组件，<br>能够快速响应Http服务请求。|
 | [![NuGet version (RRQMSocket.FileTransfer)](https://img.shields.io/nuget/v/RRQMSocket.FileTransfer.svg?label=RRQMSocket.FileTransfer)](https://www.nuget.org/packages/rrqmsocket.filetransfer)|[Gitee](https://gitee.com/RRQM_Home/rrqmsocket.filetransfer)<br>[Github](https://github.com/RRQM/RRQMSocket.FileTransfer) |  这是一个高性能的C/S架构的文件传输框架，您可以用它传输<br>**任意大小**的文件，它可以完美支持**上传下载混合式队列传输**、<br>**断点续传**、 **快速上传** 、**传输限速**、**获取文件信息**、**删除文件**等。<br>在实际测试中，它的传输速率可达1000Mb/s。 |
 
+## 🔗联系作者
+
+- [CSDN博客主页](https://blog.csdn.net/qq_40374647)
+- [哔哩哔哩视频](https://space.bilibili.com/94253567)
+- [源代码仓库主页](https://gitee.com/RRQM_Home) 
+- 交流QQ群：234762506
+
+## 🌟API手册
+- [ API首页 ](https://www.yuque.com/eo2w71/rrqm/2c5dab34026d2b45ada6e51ae9e51a5a)
 
 ## 🖥支持环境
 - .NET Framework4.5及以上。
@@ -120,21 +129,6 @@ JsonRpc解析器是遵循JsonRpc2.0的RPC服务组件，能够让使用者通过
 - **全异常反馈** 。
 - 支持大部分路由规则。
 - 支持js、Android等调用。
-
-## 🔗联系作者
-
-- [CSDN博客主页](https://blog.csdn.net/qq_40374647)
-- [哔哩哔哩视频](https://space.bilibili.com/94253567)
-- [源代码仓库主页](https://gitee.com/RRQM_Home) 
-- 交流QQ群：234762506
-
-## 🌟API手册
-- [ API首页 ](https://gitee.com/RRQM_Home/RRQMBox/wikis/API%E6%89%8B%E5%86%8C)
-- [说明](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E8%AF%B4%E6%98%8E(%E4%BD%BF%E7%94%A8%E5%89%8D%E5%BF%85%E8%A6%81%E9%98%85%E8%AF%BB))
-- [ 历史更新 ](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E5%8E%86%E5%8F%B2%E6%9B%B4%E6%96%B0)
-- [ 商业运营 ](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E5%95%86%E4%B8%9A%E8%BF%90%E8%90%A5)
-- [疑难解答](https://gitee.com/RRQM_Home/RRQMBox/wikis/%E7%96%91%E9%9A%BE%E8%A7%A3%E7%AD%94)
-
 
 ## ✨简单示例
 
