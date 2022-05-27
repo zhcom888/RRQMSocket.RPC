@@ -5,70 +5,120 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-using RRQMCore.Exceptions;
-using System;
 
-namespace RRQMSocket.RPC.RRQMRPC
+using RRQMCore;
+using RRQMSocket.RPC.TouchRpc;
+using System;
+using System.Threading.Tasks;
+
+namespace RRQMSocket.RPC
 {
     /// <summary>
-    /// 客户端RPC接口
+    /// Rpc接口
     /// </summary>
     public interface IRpcClient : IDisposable
     {
         /// <summary>
-        /// 函数式调用
+        /// 检验能否执行Rpc调用
+        /// </summary>
+        Func<IRpcClient,bool> TryCanInvoke { get; set; }
+
+        /// <summary>
+        /// Rpc调用
+        /// <para>如果调用端为客户端，则会调用服务器Rpc服务。</para>
+        /// <para>如果调用端为服务器，则会反向调用客户端Rpc服务。</para>
         /// </summary>
         /// <param name="method">函数名</param>
         /// <param name="parameters">参数</param>
-        /// <param name="invokeOption">RPC调用设置</param>
-        /// <exception cref="RRQMTimeoutException"></exception>
-        /// <exception cref="RRQMSerializationException"></exception>
-        /// <exception cref="RRQMRPCInvokeException"></exception>
-        /// <exception cref="RRQMException"></exception>
-        void Invoke(string method, InvokeOption invokeOption, params object[] parameters);
+        /// <param name="invokeOption">Rpc调用设置</param>
+        /// <exception cref="TimeoutException">调用超时</exception>
+        /// <exception cref="RpcSerializationException">序列化异常</exception>
+        /// <exception cref="RRQMRpcInvokeException">Rpc异常</exception>
+        /// <exception cref="RpcNoRegisterException">Rpc服务器未注册</exception>
+        /// <exception cref="RRQMException">其他异常</exception>
+        Task InvokeAsync(string method, IInvokeOption invokeOption, params object[] parameters);
 
         /// <summary>
-        /// 函数式调用
+        /// Rpc调用
+        /// <para>如果调用端为客户端，则会调用服务器Rpc服务。</para>
+        /// <para>如果调用端为服务器，则会反向调用客户端Rpc服务。</para>
         /// </summary>
         /// <param name="method">方法名</param>
         /// <param name="parameters">参数</param>
-        /// <param name="invokeOption">RPC调用设置</param>
-        /// <exception cref="RRQMTimeoutException"></exception>
-        /// <exception cref="RRQMSerializationException"></exception>
-        /// <exception cref="RRQMRPCInvokeException"></exception>
-        /// <exception cref="RRQMException"></exception>
+        /// <param name="invokeOption">Rpc调用设置</param>
+        /// <exception cref="TimeoutException">调用超时</exception>
+        /// <exception cref="RpcSerializationException">序列化异常</exception>
+        /// <exception cref="RRQMRpcInvokeException">Rpc异常</exception>
+        /// <exception cref="RpcNoRegisterException">Rpc服务器未注册</exception>
+        /// <exception cref="RRQMException">其他异常</exception>
         /// <returns>服务器返回结果</returns>
-        T Invoke<T>(string method, InvokeOption invokeOption, params object[] parameters);
+        Task<T> InvokeAsync<T>(string method, IInvokeOption invokeOption, params object[] parameters);
 
         /// <summary>
-        /// 函数式调用
+        /// Rpc调用
+        /// <para>如果调用端为客户端，则会调用服务器Rpc服务。</para>
+        /// <para>如果调用端为服务器，则会反向调用客户端Rpc服务。</para>
+        /// </summary>
+        /// <param name="method">函数名</param>
+        /// <param name="parameters">参数</param>
+        /// <param name="invokeOption">Rpc调用设置</param>
+        /// <exception cref="TimeoutException">调用超时</exception>
+        /// <exception cref="RpcSerializationException">序列化异常</exception>
+        /// <exception cref="RRQMRpcInvokeException">Rpc异常</exception>
+        /// <exception cref="RpcNoRegisterException">Rpc服务器未注册</exception>
+        /// <exception cref="RRQMException">其他异常</exception>
+        void Invoke(string method, IInvokeOption invokeOption, params object[] parameters);
+
+        /// <summary>
+        /// Rpc调用
+        /// <para>如果调用端为客户端，则会调用服务器Rpc服务。</para>
+        /// <para>如果调用端为服务器，则会反向调用客户端Rpc服务。</para>
+        /// </summary>
+        /// <param name="method">方法名</param>
+        /// <param name="parameters">参数</param>
+        /// <param name="invokeOption">Rpc调用设置</param>
+        /// <exception cref="TimeoutException">调用超时</exception>
+        /// <exception cref="RpcSerializationException">序列化异常</exception>
+        /// <exception cref="RRQMRpcInvokeException">Rpc异常</exception>
+        /// <exception cref="RpcNoRegisterException">Rpc服务器未注册</exception>
+        /// <exception cref="RRQMException">其他异常</exception>
+        /// <returns>服务器返回结果</returns>
+        T Invoke<T>(string method, IInvokeOption invokeOption, params object[] parameters);
+
+        /// <summary>
+        /// Rpc调用
+        /// <para>如果调用端为客户端，则会调用服务器Rpc服务。</para>
+        /// <para>如果调用端为服务器，则会反向调用客户端Rpc服务。</para>
+        /// </summary>
+        /// <param name="method">方法名</param>
+        /// <param name="parameters">参数</param>
+        /// <param name="types">对应类型集合</param>
+        /// <param name="invokeOption">Rpc调用设置</param>
+        /// <exception cref="TimeoutException">调用超时</exception>
+        /// <exception cref="RpcSerializationException">序列化异常</exception>
+        /// <exception cref="RRQMRpcInvokeException">Rpc异常</exception>
+        /// <exception cref="RpcNoRegisterException">Rpc服务器未注册</exception>
+        /// <exception cref="RRQMException">其他异常</exception>
+        /// <returns>返回值</returns>
+        T Invoke<T>(string method, IInvokeOption invokeOption, ref object[] parameters, Type[] types);
+
+        /// <summary>
+        /// Rpc调用
         /// </summary>
         /// <param name="method">方法名</param>
         /// <param name="parameters">参数</param>
         /// <param name="types"></param>
-        /// <param name="invokeOption">RPC调用设置</param>
-        /// <exception cref="RRQMTimeoutException"></exception>
-        /// <exception cref="RRQMSerializationException"></exception>
-        /// <exception cref="RRQMRPCInvokeException"></exception>
-        /// <exception cref="RRQMException"></exception>
-        /// <returns>服务器返回结果</returns>
-        T Invoke<T>(string method, InvokeOption invokeOption, ref object[] parameters, Type[] types);
-
-        /// <summary>
-        /// 函数式调用
-        /// </summary>
-        /// <param name="method">方法名</param>
-        /// <param name="parameters">参数</param>
-        /// <param name="types"></param>
-        /// <param name="invokeOption">RPC调用设置</param>
-        /// <exception cref="RRQMTimeoutException"></exception>
-        /// <exception cref="RRQMSerializationException"></exception>
-        /// <exception cref="RRQMRPCInvokeException"></exception>
-        /// <exception cref="RRQMException"></exception>
-        void Invoke(string method, InvokeOption invokeOption, ref object[] parameters, Type[] types);
+        /// <param name="invokeOption">Rpc调用设置</param>
+        /// <exception cref="TimeoutException">调用超时</exception>
+        /// <exception cref="RpcSerializationException">序列化异常</exception>
+        /// <exception cref="RRQMRpcInvokeException">Rpc异常</exception>
+        /// <exception cref="RpcNoRegisterException">Rpc服务器未注册</exception>
+        /// <exception cref="RRQMException">其他异常</exception>
+        void Invoke(string method, IInvokeOption invokeOption, ref object[] parameters, Type[] types);
     }
 }

@@ -5,11 +5,11 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-using RRQMCore;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -22,27 +22,36 @@ namespace RRQMSocket.RPC
     /// </summary>
     public class MethodMap
     {
+        private ConcurrentDictionary<string, MethodInstance> methodMap;
+
         internal MethodMap()
         {
-            this.methodMap = new ConcurrentDictionary<int, MethodInstance>();
+            this.methodMap = new ConcurrentDictionary<string, MethodInstance>();
         }
 
-        private ConcurrentDictionary<int, MethodInstance> methodMap;
-
-        internal void Add(MethodInstance methodInstance)
+        /// <summary>
+        /// 获取所有服务函数实例
+        /// </summary>
+        /// <returns></returns>
+        public MethodInstance[] GetAllMethodInstances()
         {
-            this.methodMap.TryAdd(methodInstance.MethodToken, methodInstance);
+            return this.methodMap.Values.ToArray();
         }
 
         /// <summary>
         /// 通过methodToken获取函数实例
         /// </summary>
-        /// <param name="methodToken"></param>
+        /// <param name="methodKey"></param>
         /// <param name="methodInstance"></param>
         /// <returns></returns>
-        public bool TryGet(int methodToken, out MethodInstance methodInstance)
+        public bool TryGet(string methodKey, out MethodInstance methodInstance)
         {
-            return this.methodMap.TryGetValue(methodToken, out methodInstance);
+            return this.methodMap.TryGetValue(methodKey, out methodInstance);
+        }
+
+        internal void Add(MethodInstance methodInstance)
+        {
+            this.methodMap.TryAdd(methodInstance.RouteKey, methodInstance);
         }
 
         internal bool RemoveServer(Type type, out IServerProvider serverProvider, out MethodInstance[] methodInstances)
@@ -62,19 +71,10 @@ namespace RRQMSocket.RPC
 
             foreach (var item in keys)
             {
-                this.methodMap.TryRemove(item.MethodToken, out _);
+                this.methodMap.TryRemove(item.Name, out _);
             }
             methodInstances = keys.ToArray();
             return success;
-        }
-
-        /// <summary>
-        /// 获取所有服务函数实例
-        /// </summary>
-        /// <returns></returns>
-        public MethodInstance[] GetAllMethodInstances()
-        {
-            return this.methodMap.Values.ToArray();
         }
     }
 }

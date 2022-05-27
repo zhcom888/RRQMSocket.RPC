@@ -4,7 +4,7 @@
 		<ApplicationIcon>RRQM.ico</ApplicationIcon>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>RRQM.pfx</AssemblyOriginatorKeyFile>
-		<Version>6.6.0</Version>
+		<Version>8.1.0</Version>
 		<LangVersion>9.0</LangVersion>
 		<Company>若汝棋茗</Company>
 		<Copyright>Copyright © 2021 若汝棋茗</Copyright>
@@ -23,6 +23,8 @@ DEMO：https://gitee.com/RRQM_Home/RRQMBox</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageTags>JsonRpc;Socket;IOCP,TCP,HTTP,HTTPS</PackageTags>
+		<RepositoryUrl>https://gitee.com/RRQM_Home/rrqmsocket.rpc.git</RepositoryUrl>
+		<RepositoryType>Gitee</RepositoryType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
@@ -75,7 +77,9 @@ DEMO：https://gitee.com/RRQM_Home/RRQMBox</Description>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="RRQMSocket.Http" Version="6.6.0" />
-	  <PackageReference Include="RRQMSocket.RPC" Version="6.6.0" />
+	  <PackageReference Include="RRQMCore" Version="8.1.0" />
+	  <PackageReference Include="RRQMSocket" Version="8.1.0" />
+	  <PackageReference Include="RRQMSocket.Http" Version="8.1.0" />
+	  <PackageReference Include="RRQMSocket.RPC" Version="8.1.0" />
 	</ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -26,7 +27,6 @@ namespace RRQMSocket.RPC
         /// 等待，直到发送抵达
         /// </summary>
         WaitSend,
-
         /// <summary>
         /// 等待，直到调用完成
         /// </summary>

@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -26,11 +27,16 @@ namespace RRQMSocket.RPC
         /// <summary>
         /// 代码本体
         /// </summary>
-        public string Code { get; set; }
+        public string CodeTemple { get; set; }
 
         /// <summary>
         /// 接口代码。
         /// </summary>
-        public string InterfaceCode { get; set; }
+        public string InterfaceTemple { get; set; }
+
+        /// <summary>
+        /// 扩展代码
+        /// </summary>
+        public string ExtensionsTemple { get; set; }
     }
 }

@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -34,8 +35,7 @@ namespace RRQMSocket.RPC.JsonRpc
         /// <summary>
         /// 服务键集合
         /// </summary>
-        public IEnumerable<string> ActionKeys
-        { get { return this.actionMap.Keys; } }
+        public IEnumerable<string> ActionKeys => this.actionMap.Keys;
 
         /// <summary>
         /// 通过routeUrl获取函数实例

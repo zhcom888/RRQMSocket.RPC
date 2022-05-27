@@ -5,11 +5,13 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 using System;
+using System.Linq;
 
 namespace RRQMSocket.RPC.JsonRpc
 {
@@ -17,7 +19,15 @@ namespace RRQMSocket.RPC.JsonRpc
     /// 适用于XmlRpc的标记
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    public sealed class JsonRpcAttribute : RPCAttribute
+    public class JsonRpcAttribute : RpcAttribute
     {
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <returns></returns>
+        public override Type[] GetGenericInterfaceTypes()
+        {
+            return new Type[] { typeof(IJsonRpcClient) };
+        }
     }
 }
