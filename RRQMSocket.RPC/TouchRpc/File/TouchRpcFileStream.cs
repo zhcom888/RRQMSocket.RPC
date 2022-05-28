@@ -93,7 +93,7 @@ namespace RRQMSocket.RPC.TouchRpc
             string rrqmPath = this.m_path + ".rrqm";
             string tempPath = this.m_path + ".temp";
 
-            SpinWait.SpinUntil(()=> 
+            if (!SpinWait.SpinUntil(() =>
             {
                 File.Move(rrqmPath, this.m_path);
                 if (File.Exists(tempPath))
@@ -105,8 +105,10 @@ namespace RRQMSocket.RPC.TouchRpc
                     return true;
                 }
                 return false;
-            },5000);
-            throw new IOException("已完成传输，但是在保存路径并未检测到文件存在。");
+            }, 5000))
+            {
+                throw new IOException("已完成传输，但是在保存路径并未检测到文件存在。");
+            }
         }
 
         /// <summary>
