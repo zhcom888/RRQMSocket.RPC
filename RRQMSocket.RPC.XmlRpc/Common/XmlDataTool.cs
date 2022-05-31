@@ -5,12 +5,13 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 using RRQMCore.ByteManager;
-using RRQMCore.Helper;
+using RRQMCore.Extensions;
 using RRQMSocket.Http;
 using System;
 using System.Collections;
@@ -99,7 +100,7 @@ namespace RRQMSocket.RPC.XmlRpc
             }
         }
 
-        public static void CreateRequest(ByteBlock byteBlock, string host, string method, object[] parameters)
+        public static HttpRequest CreateRequest(string host, string url, string method, object[] parameters)
         {
             XmlDocument xml = new XmlDocument();
 
@@ -116,38 +117,28 @@ namespace RRQMSocket.RPC.XmlRpc
             XmlElement paramsElement = xml.CreateElement("params");
             xmlElement.AppendChild(paramsElement);
 
-            foreach (var param in parameters)
+            if (parameters!=null)
             {
-                XmlElement paramElement = xml.CreateElement("param");
-                paramsElement.AppendChild(paramElement);
+                foreach (var param in parameters)
+                {
+                    XmlElement paramElement = xml.CreateElement("param");
+                    paramsElement.AppendChild(paramElement);
 
-                XmlElement valueElement = xml.CreateElement("value");
-                paramElement.AppendChild(valueElement);
+                    XmlElement valueElement = xml.CreateElement("value");
+                    paramElement.AppendChild(valueElement);
 
-                CreateParam(xml, valueElement, param);
+                    CreateParam(xml, valueElement, param);
+                }
             }
+           
 
-            ByteBlock xmlBlock = BytePool.GetByteBlock(byteBlock.Capacity);
-            xml.Save(xmlBlock);
-
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("POST / HTTP/1.1");
-            stringBuilder.AppendLine("Content-Type: text/xml");
-            stringBuilder.AppendLine($"Host: {host}");
-            stringBuilder.AppendLine("User-Agent: RRQMXmlRpc");
-            stringBuilder.AppendLine($"Content-Length: {xmlBlock.Length}");
-            //stringBuilder.AppendLine("Connection: Close");
-            stringBuilder.AppendLine("Connection: keep-alive");
-            stringBuilder.AppendLine();
-            try
-            {
-                byteBlock.Write(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
-                byteBlock.Write(xmlBlock.Buffer, 0, xmlBlock.Len);
-            }
-            finally
-            {
-                xmlBlock.Dispose();
-            }
+            HttpRequest request = new HttpRequest();
+            request.FromXML(xml.OuterXml)
+                .InitHeaders()
+                .SetUrl(url)
+                .SetHost(host)
+                .AsPost();
+            return request;
         }
 
         public static void CreateParam(XmlDocument xml, XmlNode xmlNode, object value)

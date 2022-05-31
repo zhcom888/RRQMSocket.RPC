@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -27,17 +28,7 @@ namespace RRQMSocket.RPC
         /// <summary>
         /// 实际调用者
         /// </summary>
-        ICaller Caller { get; }
-
-        /// <summary>
-        /// 调用信使
-        /// </summary>
-        MethodInvoker MethodInvoker { get; }
-
-        /// <summary>
-        /// RPC请求实际
-        /// </summary>
-        IRpcContext Context { get; }
+        object Caller { get; }
 
         /// <summary>
         /// 可取消的调用令箭

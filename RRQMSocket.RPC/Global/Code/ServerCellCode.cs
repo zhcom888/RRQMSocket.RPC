@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -32,14 +33,6 @@ namespace RRQMSocket.RPC
         /// </summary>
         public string Name { get; set; }
 
-#if NET45_OR_GREATER
-
-        /// <summary>
-        /// 引用
-        /// </summary>
-        public string[] Refs { get; set; }
-
-#endif
 
         private Dictionary<string, MethodCellCode> methods;
 
@@ -48,8 +41,8 @@ namespace RRQMSocket.RPC
         /// </summary>
         public Dictionary<string, MethodCellCode> Methods
         {
-            get { return methods; }
-            set { methods = value; }
+            get => this.methods;
+            set => this.methods = value;
         }
 
         private Dictionary<string, ClassCellCode> classCellCodes;
@@ -59,8 +52,8 @@ namespace RRQMSocket.RPC
         /// </summary>
         public Dictionary<string, ClassCellCode> ClassCellCodes
         {
-            get { return classCellCodes; }
-            set { classCellCodes = value; }
+            get => this.classCellCodes;
+            set => this.classCellCodes = value;
         }
     }
 }

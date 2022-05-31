@@ -5,12 +5,13 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 using RRQMCore;
-using RRQMCore.Helper;
+using RRQMCore.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,10 +46,7 @@ namespace RRQMSocket.RPC
         /// <summary>
         /// 程序集
         /// </summary>
-        public Assembly Assembly
-        {
-            get { return assembly; }
-        }
+        public Assembly Assembly => this.assembly;
 
         /// <summary>
         /// 获取类单元参数
@@ -101,11 +99,11 @@ namespace RRQMSocket.RPC
             }
             else if (listType.Contains(type.Name) || dicType.Contains(type.Name))
             {
-                return genericTypeDic[type];
+                return this.genericTypeDic[type];
             }
-            else if (propertyDic.ContainsKey(type))
+            else if (this.propertyDic.ContainsKey(type))
             {
-                return propertyDic[type].Name;
+                return this.propertyDic[type].Name;
             }
             else
             {
@@ -125,23 +123,23 @@ namespace RRQMSocket.RPC
             {
                 if (type.IsArray)
                 {
-                    AddTypeString(type.GetElementType());
+                    this.AddTypeString(type.GetElementType());
                 }
                 else if (type.IsGenericType)
                 {
                     Type[] types = type.GetGenericArguments();
                     foreach (Type itemType in types)
                     {
-                        AddTypeString(itemType);
+                        this.AddTypeString(itemType);
                     }
 
                     if (listType.Contains(type.Name))
                     {
                         string typeInnerString = this.GetTypeFullName(types[0]);
                         string typeString = $"System.Collections.Generic.{type.Name.Replace("`1", string.Empty)}<{typeInnerString}>";
-                        if (!genericTypeDic.ContainsKey(type))
+                        if (!this.genericTypeDic.ContainsKey(type))
                         {
-                            genericTypeDic.Add(type, typeString);
+                            this.genericTypeDic.Add(type, typeString);
                         }
                     }
                     else if (dicType.Contains(type.Name))
@@ -149,21 +147,21 @@ namespace RRQMSocket.RPC
                         string keyString = this.GetTypeFullName(types[0]);
                         string valueString = this.GetTypeFullName(types[1]);
                         string typeString = $"System.Collections.Generic.{type.Name.Replace("`2", string.Empty)}<{keyString},{valueString}>";
-                        if (!genericTypeDic.ContainsKey(type))
+                        if (!this.genericTypeDic.ContainsKey(type))
                         {
-                            genericTypeDic.Add(type, typeString);
+                            this.genericTypeDic.Add(type, typeString);
                         }
                     }
                 }
                 else if (type.IsInterface || type.IsAbstract)
                 {
-                    throw new RRQMRPCException("服务参数类型不允许接口或抽象类");
+                    throw new RpcException("服务参数类型不允许接口或抽象类");
                 }
                 else if (type.IsEnum)
                 {
                     Type baseType = Enum.GetUnderlyingType(type);
                     StringBuilder stringBuilder = new StringBuilder();
-                    if (baseType == RRQMReadonly.byteType)
+                    if (baseType == RRQMCoreUtility.byteType)
                     {
                         stringBuilder.AppendLine($"public enum {type.Name}:byte");
                         stringBuilder.AppendLine("{");
@@ -174,7 +172,7 @@ namespace RRQMSocket.RPC
                             stringBuilder.AppendLine($"{enumString}={(byte)item},");
                         }
                     }
-                    else if (baseType == RRQMReadonly.shortType)
+                    else if (baseType == RRQMCoreUtility.shortType)
                     {
                         stringBuilder.AppendLine($"public enum {type.Name}:short");
                         stringBuilder.AppendLine("{");
@@ -185,7 +183,7 @@ namespace RRQMSocket.RPC
                             stringBuilder.AppendLine($"{enumString}={(short)item},");
                         }
                     }
-                    else if (baseType == RRQMReadonly.intType)
+                    else if (baseType == RRQMCoreUtility.intType)
                     {
                         stringBuilder.AppendLine($"public enum {type.Name}:int");
                         stringBuilder.AppendLine("{");
@@ -196,7 +194,7 @@ namespace RRQMSocket.RPC
                             stringBuilder.AppendLine($"{enumString}={(int)item},");
                         }
                     }
-                    else if (baseType == RRQMReadonly.longType)
+                    else if (baseType == RRQMCoreUtility.longType)
                     {
                         stringBuilder.AppendLine($"public enum {type.Name}:long");
                         stringBuilder.AppendLine("{");
@@ -209,15 +207,15 @@ namespace RRQMSocket.RPC
                     }
 
                     stringBuilder.AppendLine("}");
-                    if (!propertyDic.ContainsKey(type))
+                    if (!this.propertyDic.ContainsKey(type))
                     {
-                        propertyDic.Add(type, new ClassCellCode() { Name = type.Name, Code = stringBuilder.ToString() });
+                        this.propertyDic.Add(type, new ClassCellCode() { Name = type.Name, Code = stringBuilder.ToString() });
                     }
                 }
                 else
                 {
                     string className;
-                    if (type.GetCustomAttribute<RRQMProxyAttribute>() is RRQMProxyAttribute attribute)
+                    if (type.GetCustomAttribute<RpcProxyAttribute>() is RpcProxyAttribute attribute)
                     {
                         className = attribute.ClassName;
                     }
@@ -247,13 +245,13 @@ namespace RRQMSocket.RPC
 
                     if (!type.IsStruct() && type.BaseType != typeof(object))
                     {
-                        AddTypeString(type.BaseType);
+                        this.AddTypeString(type.BaseType);
                         if (type.BaseType.IsGenericType)
                         {
                             Type[] types = type.BaseType.GetGenericArguments();
                             foreach (Type itemType in types)
                             {
-                                AddTypeString(itemType);
+                                this.AddTypeString(itemType);
                             }
                             if (listType.Contains(type.BaseType.Name))
                             {
@@ -278,8 +276,8 @@ namespace RRQMSocket.RPC
 
                     foreach (PropertyInfo itemProperty in propertyInfos)
                     {
-                        AddTypeString(itemProperty.PropertyType);
-                        if (propertyDic.ContainsKey(itemProperty.PropertyType))
+                        this.AddTypeString(itemProperty.PropertyType);
+                        if (this.propertyDic.ContainsKey(itemProperty.PropertyType))
                         {
                             stringBuilder.Append($"public {itemProperty.PropertyType.Name} {itemProperty.Name}");
                         }
@@ -288,7 +286,7 @@ namespace RRQMSocket.RPC
                             Type[] types = itemProperty.PropertyType.GetGenericArguments();
                             foreach (Type itemType in types)
                             {
-                                AddTypeString(itemType);
+                                this.AddTypeString(itemType);
                             }
 
                             if (listType.Contains(itemProperty.PropertyType.Name))
@@ -305,7 +303,7 @@ namespace RRQMSocket.RPC
                         }
                         else
                         {
-                            AddTypeString(itemProperty.PropertyType);
+                            this.AddTypeString(itemProperty.PropertyType);
                             stringBuilder.Append($"public {itemProperty.PropertyType.FullName} {itemProperty.Name}");
                         }
 
@@ -314,9 +312,9 @@ namespace RRQMSocket.RPC
 
                     stringBuilder.AppendLine("}");
 
-                    if (!propertyDic.ContainsKey(type))
+                    if (!this.propertyDic.ContainsKey(type))
                     {
-                        propertyDic.Add(type, new ClassCellCode() { Name = className, Code = stringBuilder.ToString() });
+                        this.propertyDic.Add(type, new ClassCellCode() { Name = className, Code = stringBuilder.ToString() });
                     }
                 }
             }

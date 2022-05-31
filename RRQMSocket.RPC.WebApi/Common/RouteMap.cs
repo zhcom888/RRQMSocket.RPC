@@ -5,10 +5,12 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
+using RRQMCore.Extensions;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -28,14 +30,18 @@ namespace RRQMSocket.RPC.WebApi
 
         internal void Add(string routeUrl, MethodInstance methodInstance)
         {
-            this.routeMap.Add(routeUrl, methodInstance);
+            this.routeMap.TryAdd(routeUrl, methodInstance);
+        }
+
+        internal void Remove(string routeUrl)
+        {
+            this.routeMap.Remove(routeUrl);
         }
 
         /// <summary>
         /// 路由路径集合
         /// </summary>
-        public IEnumerable<string> Urls
-        { get { return this.routeMap.Keys; } }
+        public IEnumerable<string> Urls => this.routeMap.Keys;
 
         /// <summary>
         /// 通过routeUrl获取函数实例
@@ -45,6 +51,7 @@ namespace RRQMSocket.RPC.WebApi
         /// <returns></returns>
         public bool TryGet(string routeUrl, out MethodInstance methodInstance)
         {
+            routeUrl = routeUrl.ToLower();
             if (this.routeMap.ContainsKey(routeUrl))
             {
                 methodInstance = this.routeMap[routeUrl];

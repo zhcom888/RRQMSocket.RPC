@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -14,37 +15,14 @@ using System;
 namespace RRQMSocket.RPC
 {
     /// <summary>
-    /// RPC解析器
+    /// Rpc解析器
     /// </summary>
-    public interface IRPCParser : IDisposable
+    public interface IRpcParser : IDisposable
     {
         /// <summary>
-        /// 设置执行函数
+        /// 设置此解析器的服务器实例
         /// </summary>
-        /// <param name="executeMethod"></param>
-        void SetExecuteMethod(Action<IRPCParser, MethodInvoker, MethodInstance> executeMethod);
-
-        /// <summary>
-        /// 执行函数
-        /// </summary>
-        Action<IRPCParser, MethodInvoker, MethodInstance> RRQMExecuteMethod { get; }
-
-        /// <summary>
-        /// 获取函数映射图
-        /// </summary>
-        MethodMap MethodMap { get; }
-
-        /// <summary>
-        /// 包含此解析器的服务器实例
-        /// </summary>
-        RPCService RPCService { get; }
-
-        /// <summary>
-        /// 结束调用
-        /// </summary>
-        /// <param name="methodInvoker"></param>
-        /// <param name="methodInstance"></param>
-        void OnEndInvoke(MethodInvoker methodInvoker, MethodInstance methodInstance);
+        void SetRpcStore(RpcStore rpcService);
 
         /// <summary>
         /// 注册服务
@@ -59,23 +37,5 @@ namespace RRQMSocket.RPC
         /// <param name="provider"></param>
         /// <param name="methodInstances"></param>
         void OnUnregisterServer(IServerProvider provider, MethodInstance[] methodInstances);
-
-        /// <summary>
-        /// 设置函数映射
-        /// </summary>
-        /// <param name="methodMap"></param>
-        void SetMethodMap(MethodMap methodMap);
-
-        /// <summary>
-        /// 设置服务
-        /// </summary>
-        /// <param name="service"></param>
-        void SetRPCService(RPCService service);
-
-        /// <summary>
-        /// 获取代理信息
-        /// </summary>
-        /// <param name="args">如果接受处理，设置Handled，并且返回代理。</param>
-        void GetProxyInfo(GetProxyInfoArgs args);
     }
 }

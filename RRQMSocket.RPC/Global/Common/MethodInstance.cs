@@ -5,81 +5,41 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
+using RRQMCore.Reflection;
 using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
 namespace RRQMSocket.RPC
 {
     /// <summary>
-    /// RPC函数实例
+    /// Rpc函数实例
     /// </summary>
-    public class MethodInstance
+    public class MethodInstance : Method
     {
         /// <summary>
-        /// 执行此RPC的实例
+        /// 构造函数
         /// </summary>
-        public IServerProvider Provider { get; internal set; }
+        /// <param name="methodInfo"></param>
+        public MethodInstance(MethodInfo methodInfo) : base(methodInfo)
+        {
+
+        }
 
         /// <summary>
-        /// 实例类型
+        /// 路由键
         /// </summary>
-        public Type ProviderType { get; internal set; }
+        public string RouteKey { get; set; }
 
         /// <summary>
-        /// RPC函数
+        /// 描述属性
         /// </summary>
-        public MethodInfo Method { get; internal set; }
-
-        /// <summary>
-        /// RPC属性集合
-        /// </summary>
-        public RPCAttribute[] RPCAttributes { get; internal set; }
-
-        /// <summary>
-        /// 描述属性集合
-        /// </summary>
-        public DescriptionAttribute DescriptionAttribute { get; internal set; }
-
-        /// <summary>
-        /// 方法唯一令箭
-        /// </summary>
-        public int MethodToken { get; internal set; }
-
-        /// <summary>
-        /// 返回值类型，无返回值时为Null
-        /// </summary>
-        public Type ReturnType { get; internal set; }
-
-        /// <summary>
-        /// 参数类型集合，已处理out及ref，无参数时为空集合，
-        /// </summary>
-        public Type[] ParameterTypes { get; internal set; }
-
-        /// <summary>
-        /// 参数集合
-        /// </summary>
-        public ParameterInfo[] Parameters { get; internal set; }
-
-        /// <summary>
-        /// 参数名集合
-        /// </summary>
-        public string[] ParameterNames { get; internal set; }
-
-        /// <summary>
-        /// 是否异步执行
-        /// </summary>
-        public AsyncType AsyncType { get; internal set; }
-
-        /// <summary>
-        /// 是否有引用类型
-        /// </summary>
-        public bool IsByRef { get; internal set; }
+        public string Description { get; internal set; }
 
         /// <summary>
         /// 是否可用
@@ -92,18 +52,63 @@ namespace RRQMSocket.RPC
         public MethodFlags MethodFlags { get; internal set; }
 
         /// <summary>
+        /// 参数名集合
+        /// </summary>
+        public string[] ParameterNames { get; internal set; }
+
+        /// <summary>
+        /// 参数集合
+        /// </summary>
+        public ParameterInfo[] Parameters { get; internal set; }
+
+        /// <summary>
+        /// 参数类型集合，已处理out及ref，无参数时为空集合，
+        /// </summary>
+        public Type[] ParameterTypes { get; internal set; }
+
+        /// <summary>
+        /// 执行此Rpc的实例
+        /// </summary>
+        public IServerProvider Provider { get; internal set; }
+
+        /// <summary>
+        /// 实例类型
+        /// </summary>
+        public Type ProviderType { get; internal set; }
+
+        /// <summary>
+        /// Rpc属性集合
+        /// </summary>
+        public RpcAttribute[] RpcAttributes { get; internal set; }
+
+        /// <summary>
         /// 获取指定类型属性标签
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public T GetAttribute<T>()
         {
-            object attribute = this.RPCAttributes.FirstOrDefault((a) => { return a.GetType() == typeof(T); });
+            object attribute = this.RpcAttributes.FirstOrDefault((a) => { return a.GetType() == typeof(T); });
             if (attribute == null)
             {
                 return default;
             }
             return (T)attribute;
+        }
+
+        /// <summary>
+        /// 获取指定类型属性标签
+        /// </summary>
+        /// <param name="attributeType"></param>
+        /// <returns></returns>
+        public object GetAttribute(Type attributeType)
+        {
+            object attribute = this.RpcAttributes.FirstOrDefault((a) => { return a.GetType() == attributeType; });
+            if (attribute == null)
+            {
+                return default;
+            }
+            return attribute;
         }
     }
 }

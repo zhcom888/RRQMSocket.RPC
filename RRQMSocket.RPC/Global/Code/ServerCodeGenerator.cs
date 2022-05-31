@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -21,7 +22,7 @@ namespace RRQMSocket.RPC
     /// </summary>
     public class ServerCodeGenerator
     {
-        private ClassCodeGenerator classCodeGenerator;
+        private readonly ClassCodeGenerator m_classCodeGenerator;
 
         /// <summary>
         /// 构造函数
@@ -29,16 +30,13 @@ namespace RRQMSocket.RPC
         /// <param name="classCodeGenerator"></param>
         public ServerCodeGenerator(ClassCodeGenerator classCodeGenerator)
         {
-            this.classCodeGenerator = classCodeGenerator;
+            this.m_classCodeGenerator = classCodeGenerator;
         }
 
         /// <summary>
         /// 类代码生成器
         /// </summary>
-        public ClassCodeGenerator ClassCodeGenerator
-        {
-            get { return classCodeGenerator; }
-        }
+        public ClassCodeGenerator ClassCodeGenerator => this.m_classCodeGenerator;
 
         /// <summary>
         /// 从类型获取代理名
@@ -47,156 +45,80 @@ namespace RRQMSocket.RPC
         /// <returns></returns>
         public string GetName(Type type)
         {
-            return this.classCodeGenerator.GetTypeFullName(type);
+            return this.m_classCodeGenerator.GetTypeFullName(type);
         }
 
         /// <summary>
         /// 获取接口代码
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="methodInstance"></param>
+        /// <param name="attribute"></param>
         /// <returns></returns>
-        public string GetInterfaceProxy<T>(MethodInstance methodInstance) where T : RPCAttribute
+        public string GetInterfaceProxy(MethodInstance methodInstance, RpcAttribute attribute)
         {
-            bool isOut = false;
-            bool isRef = false;
-            string methodName = CodeGenerator.GetMethodName<T>(methodInstance);
             StringBuilder codeString = new StringBuilder();
-            if (methodInstance.DescriptionAttribute != null)
+            string description = attribute.GetDescription(methodInstance);
+
+            codeString.AppendLine("///<summary>");
+            codeString.AppendLine($"///{description}");
+            codeString.AppendLine("///</summary>");
+            foreach (var item in attribute.Exceptions)
             {
-                codeString.AppendLine("///<summary>");
-                codeString.AppendLine($"///{methodInstance.DescriptionAttribute.Description}");
-                codeString.AppendLine("///</summary>");
+                codeString.AppendLine($"/// <exception cref=\"{item.Key.FullName}\">{item.Value}</exception>");
             }
 
-            if (methodInstance.ReturnType == null)
-            {
-                codeString.Append(string.Format("  void {0} ", methodName));
-            }
-            else
-            {
-                codeString.Append(string.Format(" {0} {1} ", this.GetName(methodInstance.ReturnType), methodName));
-            }
+            codeString.Append(attribute.GetReturn(methodInstance, this.m_classCodeGenerator, false));
+            codeString.Append(" ");
+            codeString.Append(attribute.GetMethodName(methodInstance, false));
             codeString.Append("(");//方法参数
 
-            ParameterInfo[] parameters;
-            if (methodInstance.MethodFlags.HasFlag(MethodFlags.IncludeCallContext))
-            {
-                List<ParameterInfo> infos = new List<ParameterInfo>(methodInstance.Parameters);
-                infos.RemoveAt(0);
-                parameters = infos.ToArray();
-            }
-            else
-            {
-                parameters = methodInstance.Parameters;
-            }
-
-            for (int i = 0; i < parameters.Length; i++)
+            bool isOut;
+            bool isRef;
+            List<string> parameters = attribute.GetParameters(methodInstance, this.m_classCodeGenerator, out isOut, out isRef, out _);
+            for (int i = 0; i < parameters.Count; i++)
             {
                 if (i > 0)
                 {
                     codeString.Append(",");
                 }
-                if (parameters[i].ParameterType.Name.Contains("&"))
-                {
-                    if (parameters[i].IsOut)
-                    {
-                        isOut = true;
-                        codeString.Append(string.Format("out {0} {1}", this.GetName(parameters[i].ParameterType), parameters[i].Name));
-                    }
-                    else
-                    {
-                        isRef = true;
-                        codeString.Append(string.Format("ref {0} {1}", this.GetName(parameters[i].ParameterType), parameters[i].Name));
-                    }
-                }
-                else
-                {
-                    codeString.Append(string.Format("{0} {1}", this.GetName(parameters[i].ParameterType), parameters[i].Name));
-                }
-
-                if (parameters[i].HasDefaultValue)
-                {
-                    object defaultValue = parameters[i].DefaultValue;
-                    if (defaultValue == null)
-                    {
-                        codeString.Append(string.Format("=null"));
-                    }
-                    else if (defaultValue.ToString() == string.Empty)
-                    {
-                        codeString.Append(string.Format("=\"\""));
-                    }
-                    else if (defaultValue.GetType() == typeof(string))
-                    {
-                        codeString.Append(string.Format("=\"{0}\"", defaultValue));
-                    }
-                    else if (typeof(ValueType).IsAssignableFrom(defaultValue.GetType()))
-                    {
-                        codeString.Append(string.Format("={0}", defaultValue));
-                    }
-                }
+                codeString.Append(parameters[i]);
             }
-            if (parameters.Length > 0)
+            if (parameters.Count > 0)
             {
                 codeString.Append(",");
             }
-            codeString.AppendLine("InvokeOption invokeOption = null);");
+            codeString.Append(attribute.GetInvokeOption());
+            codeString.AppendLine(");");
 
             if (!isOut && !isRef)//没有out或者ref
             {
-                if (methodInstance.DescriptionAttribute != null)
+                codeString.AppendLine("///<summary>");
+                codeString.AppendLine($"///{description}");
+                codeString.AppendLine("///</summary>");
+                foreach (var item in attribute.Exceptions)
                 {
-                    codeString.AppendLine("///<summary>");
-                    codeString.AppendLine($"///{methodInstance.DescriptionAttribute.Description}");
-                    codeString.AppendLine("///</summary>");
+                    codeString.AppendLine($"/// <exception cref=\"{item.Key.FullName}\">{item.Value}</exception>");
                 }
 
-                if (methodInstance.ReturnType == null)
-                {
-                    codeString.Append(string.Format("void {0} ", methodName + "Async"));
-                }
-                else
-                {
-                    codeString.Append(string.Format("Task<{0}> {1} ", this.GetName(methodInstance.ReturnType), methodName + "Async"));
-                }
-
+                codeString.Append(attribute.GetReturn(methodInstance, this.m_classCodeGenerator, true));
+                codeString.Append(" ");
+                codeString.Append(attribute.GetMethodName(methodInstance, true));
                 codeString.Append("(");//方法参数
 
-                for (int i = 0; i < parameters.Length; i++)
+                for (int i = 0; i < parameters.Count; i++)
                 {
                     if (i > 0)
                     {
                         codeString.Append(",");
                     }
-
-                    codeString.Append(string.Format("{0} {1}", this.GetName(parameters[i].ParameterType), parameters[i].Name));
-                    if (parameters[i].DefaultValue != System.DBNull.Value)
-                    {
-                        object defaultValue = parameters[i].DefaultValue;
-                        if (defaultValue == null)
-                        {
-                            codeString.Append(string.Format("=null"));
-                        }
-                        else if (defaultValue.ToString() == string.Empty)
-                        {
-                            codeString.Append(string.Format("=\"\""));
-                        }
-                        else if (defaultValue.GetType() == typeof(string))
-                        {
-                            codeString.Append(string.Format("=\"{0}\"", defaultValue));
-                        }
-                        else if (typeof(ValueType).IsAssignableFrom(defaultValue.GetType()))
-                        {
-                            codeString.Append(string.Format("={0}", defaultValue));
-                        }
-                    }
+                    codeString.Append(parameters[i]);
                 }
-
-                if (parameters.Length > 0)
+                if (parameters.Count > 0)
                 {
                     codeString.Append(",");
                 }
-                codeString.AppendLine("InvokeOption invokeOption = null);");
+                codeString.Append(attribute.GetInvokeOption());
+                codeString.AppendLine(");");
             }
 
             return codeString.ToString();
@@ -205,164 +127,136 @@ namespace RRQMSocket.RPC
         /// <summary>
         /// 获取函数代码
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="methodInstance"></param>
+        /// <param name="attribute"></param>
         /// <returns></returns>
-        public string GetMethodProxy<T>(MethodInstance methodInstance) where T : RPCAttribute
+        public string GetMethodProxy(MethodInstance methodInstance, RpcAttribute attribute)
         {
-            bool isReturn;
-            bool isOut = false;
-            bool isRef = false;
-            string methodName = CodeGenerator.GetMethodName<T>(methodInstance);
             StringBuilder codeString = new StringBuilder();
+
+            string description = attribute.GetDescription(methodInstance);
+
             codeString.AppendLine("///<summary>");
-            codeString.AppendLine("///<inheritdoc/>");
+            codeString.AppendLine($"///{description}");
             codeString.AppendLine("///</summary>");
-            if (methodInstance.ReturnType == null)
+            foreach (var item in attribute.Exceptions)
             {
-                isReturn = false;
-                codeString.Append(string.Format("public  void {0} ", methodName));
+                codeString.AppendLine($"/// <exception cref=\"{item.Key.FullName}\">{item.Value}</exception>");
             }
-            else
-            {
-                isReturn = true;
-                codeString.Append(string.Format("public {0} {1} ", this.GetName(methodInstance.ReturnType), methodName));
-            }
+
+            codeString.Append("public ");
+            codeString.Append(attribute.GetReturn(methodInstance, this.m_classCodeGenerator, false));
+            codeString.Append(" ");
+            codeString.Append(attribute.GetMethodName(methodInstance, false));
             codeString.Append("(");//方法参数
 
-            ParameterInfo[] parameters;
-            if (methodInstance.MethodFlags.HasFlag(MethodFlags.IncludeCallContext))
-            {
-                List<ParameterInfo> infos = new List<ParameterInfo>(methodInstance.Parameters);
-                infos.RemoveAt(0);
-                parameters = infos.ToArray();
-            }
-            else
-            {
-                parameters = methodInstance.Parameters;
-            }
 
-            for (int i = 0; i < parameters.Length; i++)
+            bool isOut;
+            bool isRef;
+            ParameterInfo[] parameters;
+            List<string> parametersStr = attribute.GetParameters(methodInstance, this.m_classCodeGenerator, out isOut, out isRef, out parameters);
+            for (int i = 0; i < parametersStr.Count; i++)
             {
                 if (i > 0)
                 {
                     codeString.Append(",");
                 }
-                if (parameters[i].ParameterType.Name.Contains("&"))
-                {
-                    if (parameters[i].IsOut)
-                    {
-                        isOut = true;
-                        codeString.Append(string.Format("out {0} {1}", this.GetName(parameters[i].ParameterType), parameters[i].Name));
-                    }
-                    else
-                    {
-                        isRef = true;
-                        codeString.Append(string.Format("ref {0} {1}", this.GetName(parameters[i].ParameterType), parameters[i].Name));
-                    }
-                }
-                else
-                {
-                    codeString.Append(string.Format("{0} {1}", this.GetName(parameters[i].ParameterType), parameters[i].Name));
-                }
-
-                if (parameters[i].HasDefaultValue)
-                {
-                    object defaultValue = parameters[i].DefaultValue;
-                    if (defaultValue == null)
-                    {
-                        codeString.Append(string.Format("=null"));
-                    }
-                    else if (defaultValue.ToString() == string.Empty)
-                    {
-                        codeString.Append(string.Format("=\"\""));
-                    }
-                    else if (defaultValue.GetType() == typeof(string))
-                    {
-                        codeString.Append(string.Format("=\"{0}\"", defaultValue));
-                    }
-                    else if (typeof(ValueType).IsAssignableFrom(defaultValue.GetType()))
-                    {
-                        codeString.Append(string.Format("={0}", defaultValue));
-                    }
-                }
+                codeString.Append(parametersStr[i]);
             }
-            if (parameters.Length > 0)
+            if (parametersStr.Count > 0)
             {
                 codeString.Append(",");
             }
-            codeString.AppendLine("InvokeOption invokeOption = null)");
+            codeString.Append(attribute.GetInvokeOption());
+            codeString.AppendLine(")");
 
             codeString.AppendLine("{");//方法开始
 
             codeString.AppendLine("if(Client==null)");
             codeString.AppendLine("{");
-            codeString.AppendLine("throw new RRQMRPCException(\"IRPCClient为空，请先初始化或者进行赋值\");");
+            codeString.AppendLine("throw new RpcException(\"IRpcClient为空，请先初始化或者进行赋值\");");
             codeString.AppendLine("}");
 
-            codeString.Append($"object[] parameters = new object[]");
-            codeString.Append("{");
-            foreach (ParameterInfo parameter in parameters)
+            if (parametersStr.Count > 0)
             {
-                if (parameter.ParameterType.Name.Contains("&") && parameter.IsOut)
-                {
-                    codeString.Append($"default({this.GetName(parameter.ParameterType)})");
-                }
-                else
-                {
-                    codeString.Append(parameter.Name);
-                }
-                if (parameter != parameters[parameters.Length - 1])
-                {
-                    codeString.Append(",");
-                }
-            }
-            codeString.AppendLine("};");
-
-            if (isOut || isRef)
-            {
-                codeString.Append($"Type[] types = new Type[]");
+                codeString.Append($"object[] parameters = new object[]");
                 codeString.Append("{");
+
                 foreach (ParameterInfo parameter in parameters)
                 {
-                    codeString.Append($"typeof({this.GetName(parameter.ParameterType)})");
+                    if (parameter.ParameterType.Name.Contains("&") && parameter.IsOut)
+                    {
+                        codeString.Append($"default({this.GetName(parameter.ParameterType)})");
+                    }
+                    else
+                    {
+                        codeString.Append(parameter.Name);
+                    }
                     if (parameter != parameters[parameters.Length - 1])
                     {
                         codeString.Append(",");
                     }
                 }
                 codeString.AppendLine("};");
+
+                if (isOut || isRef)
+                {
+                    codeString.Append($"Type[] types = new Type[]");
+                    codeString.Append("{");
+                    foreach (ParameterInfo parameter in parameters)
+                    {
+                        codeString.Append($"typeof({this.GetName(parameter.ParameterType)})");
+                        if (parameter != parameters[parameters.Length - 1])
+                        {
+                            codeString.Append(",");
+                        }
+                    }
+                    codeString.AppendLine("};");
+                }
             }
 
-            if (isReturn)
+            if (methodInstance.HasReturn)
             {
-                if (isOut || isRef)
+                if (parametersStr.Count == 0)
                 {
                     codeString.Append(string.Format("{0} returnData=Client.Invoke<{0}>", this.GetName(methodInstance.ReturnType)));
                     codeString.Append("(");
-                    codeString.Append(string.Format("\"{0}\"", methodName));
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                    codeString.AppendLine(",invokeOption, null);");
+                }
+                else if (isOut || isRef)
+                {
+                    codeString.Append(string.Format("{0} returnData=Client.Invoke<{0}>", this.GetName(methodInstance.ReturnType)));
+                    codeString.Append("(");
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
                     codeString.AppendLine(",invokeOption,ref parameters,types);");
                 }
                 else
                 {
                     codeString.Append(string.Format("{0} returnData=Client.Invoke<{0}>", this.GetName(methodInstance.ReturnType)));
                     codeString.Append("(");
-                    codeString.Append(string.Format("\"{0}\"", methodName));
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
                     codeString.AppendLine(",invokeOption, parameters);");
                 }
             }
             else
             {
-                if (isOut || isRef)
+                if (parametersStr.Count == 0)
                 {
                     codeString.Append("Client.Invoke(");
-                    codeString.Append(string.Format("\"{0}\"", methodName));
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                    codeString.AppendLine(",invokeOption, null);");
+                }
+                else if (isOut || isRef)
+                {
+                    codeString.Append("Client.Invoke(");
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
                     codeString.AppendLine(",invokeOption,ref parameters,types);");
                 }
                 else
                 {
                     codeString.Append("Client.Invoke(");
-                    codeString.Append(string.Format("\"{0}\"", methodName));
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
                     codeString.AppendLine(",invokeOption, parameters);");
                 }
             }
@@ -390,7 +284,7 @@ namespace RRQMSocket.RPC
                 }
             }
 
-            if (isReturn)
+            if (methodInstance.HasReturn)
             {
                 codeString.AppendLine("return returnData;");
             }
@@ -401,87 +295,375 @@ namespace RRQMSocket.RPC
             if (!isOut && !isRef)//没有out或者ref
             {
                 codeString.AppendLine("///<summary>");
-                codeString.AppendLine("///<inheritdoc/>");
+                codeString.AppendLine($"///{description}");
                 codeString.AppendLine("///</summary>");
-                if (methodInstance.ReturnType == null)
-                {
-                    isReturn = false;
-                    codeString.Append(string.Format("public  async void {0} ", methodName + "Async"));
-                }
-                else
-                {
-                    isReturn = true;
-                    codeString.Append(string.Format("public  async Task<{0}> {1} ", this.GetName(methodInstance.ReturnType), methodName + "Async"));
-                }
-
+                codeString.Append("public ");
+                codeString.Append(attribute.GetReturn(methodInstance, this.m_classCodeGenerator, true));
+                codeString.Append(" ");
+                codeString.Append(attribute.GetMethodName(methodInstance, true));
                 codeString.Append("(");//方法参数
 
-                for (int i = 0; i < parameters.Length; i++)
+                for (int i = 0; i < parametersStr.Count; i++)
                 {
                     if (i > 0)
                     {
                         codeString.Append(",");
                     }
-
-                    codeString.Append(string.Format("{0} {1}", this.GetName(parameters[i].ParameterType), parameters[i].Name));
-                    if (parameters[i].DefaultValue != System.DBNull.Value)
-                    {
-                        object defaultValue = parameters[i].DefaultValue;
-                        if (defaultValue == null)
-                        {
-                            codeString.Append(string.Format("=null"));
-                        }
-                        else if (defaultValue.ToString() == string.Empty)
-                        {
-                            codeString.Append(string.Format("=\"\""));
-                        }
-                        else if (defaultValue.GetType() == typeof(string))
-                        {
-                            codeString.Append(string.Format("=\"{0}\"", defaultValue));
-                        }
-                        else if (typeof(ValueType).IsAssignableFrom(defaultValue.GetType()))
-                        {
-                            codeString.Append(string.Format("={0}", defaultValue));
-                        }
-                    }
+                    codeString.Append(parametersStr[i]);
                 }
-
-                if (parameters.Length > 0)
+                if (parametersStr.Count > 0)
                 {
                     codeString.Append(",");
                 }
-                codeString.AppendLine("InvokeOption invokeOption = null)");
+                codeString.Append(attribute.GetInvokeOption());
+                codeString.AppendLine(")");
+
                 codeString.AppendLine("{");//方法开始
+
                 codeString.AppendLine("if(Client==null)");
                 codeString.AppendLine("{");
-                codeString.AppendLine("throw new RRQMRPCException(\"RPCClient为空，请先初始化或者进行赋值\");");
+                codeString.AppendLine("throw new RpcException(\"IRpcClient为空，请先初始化或者进行赋值\");");
                 codeString.AppendLine("}");
-                if (isReturn)
+
+                if (parametersStr.Count > 0)
                 {
-                    codeString.AppendLine("return await Task.Run(() =>{");
-                    codeString.Append(string.Format("return {0}(", methodName));
+                    codeString.Append($"object[] parameters = new object[]");
+                    codeString.Append("{");
+                    foreach (ParameterInfo parameter in parameters)
+                    {
+                        codeString.Append(parameter.Name);
+                        if (parameter != parameters[parameters.Length - 1])
+                        {
+                            codeString.Append(",");
+                        }
+                    }
+                    codeString.AppendLine("};");
+                }
+
+
+                if (methodInstance.HasReturn)
+                {
+                    if (parametersStr.Count == 0)
+                    {
+                        codeString.Append(string.Format("return Client.InvokeAsync<{0}>", this.GetName(methodInstance.ReturnType)));
+                        codeString.Append("(");
+                        codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                        codeString.AppendLine(",invokeOption, null);");
+                    }
+                    else
+                    {
+                        codeString.Append(string.Format("return Client.InvokeAsync<{0}>", this.GetName(methodInstance.ReturnType)));
+                        codeString.Append("(");
+                        codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                        codeString.AppendLine(",invokeOption, parameters);");
+                    }
+
                 }
                 else
                 {
-                    codeString.AppendLine("await Task.Run(() =>{");
-                    codeString.Append(string.Format("{0}(", methodName));
+                    if (parametersStr.Count == 0)
+                    {
+                        codeString.Append("return Client.InvokeAsync(");
+                        codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                        codeString.AppendLine(",invokeOption, null);");
+                    }
+                    else
+                    {
+                        codeString.Append("return Client.InvokeAsync(");
+                        codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                        codeString.AppendLine(",invokeOption, parameters);");
+                    }
+
+                }
+                codeString.AppendLine("}");
+            }
+            return codeString.ToString();
+        }
+
+        /// <summary>
+        /// 获取扩展函数代码
+        /// </summary>
+        /// <param name="methodInstance"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        public string GetExtensionsMethodProxy(MethodInstance methodInstance, RpcAttribute attribute)
+        {
+            StringBuilder codeString = new StringBuilder();
+
+            string description = attribute.GetDescription(methodInstance);
+
+            codeString.AppendLine("///<summary>");
+            codeString.AppendLine($"///{description}");
+            codeString.AppendLine("///</summary>");
+            foreach (var item in attribute.Exceptions)
+            {
+                codeString.AppendLine($"/// <exception cref=\"{item.Key.FullName}\">{item.Value}</exception>");
+            }
+
+            codeString.Append("public static ");
+            codeString.Append(attribute.GetReturn(methodInstance, this.m_classCodeGenerator, false));
+            codeString.Append(" ");
+            codeString.Append(attribute.GetMethodName(methodInstance, false));
+            codeString.Append("<TClient>(");//方法参数
+
+
+            bool isOut;
+            bool isRef;
+
+            codeString.Append($"this TClient client");
+
+            ParameterInfo[] parameters;
+            List<string> parametersStr = attribute.GetParameters(methodInstance, this.m_classCodeGenerator, out isOut, out isRef, out parameters);
+            codeString.Append(",");
+            for (int i = 0; i < parametersStr.Count; i++)
+            {
+                if (i > 0)
+                {
+                    codeString.Append(",");
                 }
 
+                codeString.Append(parametersStr[i]);
+            }
+            if (parametersStr.Count > 0)
+            {
+                codeString.Append(",");
+            }
+            codeString.Append(attribute.GetInvokeOption());
+            codeString.AppendLine(") where TClient:");
+
+            var InterfaceTypes = attribute.GetGenericInterfaceTypes();
+
+            for (int i = 0; i < InterfaceTypes.Length; i++)
+            {
+                if (i > 0)
+                {
+                    codeString.Append(",");
+                }
+
+                codeString.Append(InterfaceTypes[i].FullName);
+            }
+
+            codeString.AppendLine("{");//方法开始
+
+            codeString.AppendLine("if (client.TryCanInvoke?.Invoke(client)==false)");
+            codeString.AppendLine("{");
+            codeString.AppendLine($"throw new RpcException(\"Rpc无法执行。\");");
+            codeString.AppendLine("}");
+
+            if (parametersStr.Count > 0)
+            {
+                codeString.Append($"object[] parameters = new object[]");
+                codeString.Append("{");
+
+
+                foreach (ParameterInfo parameter in parameters)
+                {
+                    if (parameter.ParameterType.Name.Contains("&") && parameter.IsOut)
+                    {
+                        codeString.Append($"default({this.GetName(parameter.ParameterType)})");
+                    }
+                    else
+                    {
+                        codeString.Append(parameter.Name);
+                    }
+                    if (parameter != parameters[parameters.Length - 1])
+                    {
+                        codeString.Append(",");
+                    }
+                }
+                codeString.AppendLine("};");
+
+                if (isOut || isRef)
+                {
+                    codeString.Append($"Type[] types = new Type[]");
+                    codeString.Append("{");
+                    foreach (ParameterInfo parameter in parameters)
+                    {
+                        codeString.Append($"typeof({this.GetName(parameter.ParameterType)})");
+                        if (parameter != parameters[parameters.Length - 1])
+                        {
+                            codeString.Append(",");
+                        }
+                    }
+                    codeString.AppendLine("};");
+                }
+            }
+
+
+
+
+            if (methodInstance.HasReturn)
+            {
+                if (parametersStr.Count == 0)
+                {
+                    codeString.Append(string.Format("{0} returnData=client.Invoke<{0}>", this.GetName(methodInstance.ReturnType)));
+                    codeString.Append("(");
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                    codeString.AppendLine(",invokeOption, null);");
+                }
+                else if (isOut || isRef)
+                {
+                    codeString.Append(string.Format("{0} returnData=client.Invoke<{0}>", this.GetName(methodInstance.ReturnType)));
+                    codeString.Append("(");
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                    codeString.AppendLine(",invokeOption,ref parameters,types);");
+                }
+                else
+                {
+                    codeString.Append(string.Format("{0} returnData=client.Invoke<{0}>", this.GetName(methodInstance.ReturnType)));
+                    codeString.Append("(");
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                    codeString.AppendLine(",invokeOption, parameters);");
+                }
+            }
+            else
+            {
+                if (parametersStr.Count == 0)
+                {
+                    codeString.Append("client.Invoke(");
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                    codeString.AppendLine(",invokeOption, null);");
+                }
+                else  if (isOut || isRef)
+                {
+                    codeString.Append("client.Invoke(");
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                    codeString.AppendLine(",invokeOption,ref parameters,types);");
+                }
+                else
+                {
+                    codeString.Append("client.Invoke(");
+                    codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                    codeString.AppendLine(",invokeOption, parameters);");
+                }
+            }
+            if (isOut || isRef)
+            {
+                codeString.AppendLine("if(parameters!=null)");
+                codeString.AppendLine("{");
                 for (int i = 0; i < parameters.Length; i++)
+                {
+                    codeString.AppendLine(string.Format("{0}=({1})parameters[{2}];", parameters[i].Name, this.GetName(parameters[i].ParameterType), i));
+                }
+                codeString.AppendLine("}");
+                if (isOut)
+                {
+                    codeString.AppendLine("else");
+                    codeString.AppendLine("{");
+                    for (int i = 0; i < parameters.Length; i++)
+                    {
+                        if (parameters[i].IsOut)
+                        {
+                            codeString.AppendLine(string.Format("{0}=default({1});", parameters[i].Name, this.GetName(parameters[i].ParameterType)));
+                        }
+                    }
+                    codeString.AppendLine("}");
+                }
+            }
+
+            if (methodInstance.HasReturn)
+            {
+                codeString.AppendLine("return returnData;");
+            }
+
+            codeString.AppendLine("}");
+
+            //以下生成异步
+            if (!isOut && !isRef)//没有out或者ref
+            {
+                codeString.AppendLine("///<summary>");
+                codeString.AppendLine($"///{description}");
+                codeString.AppendLine("///</summary>");
+                codeString.Append("public static ");
+                codeString.Append(attribute.GetReturn(methodInstance, this.m_classCodeGenerator, true));
+                codeString.Append(" ");
+                codeString.Append(attribute.GetMethodName(methodInstance, true));
+                codeString.Append("<TClient>(");//方法参数
+
+                codeString.Append($"this TClient client");
+
+                codeString.Append(",");
+                for (int i = 0; i < parametersStr.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        codeString.Append(",");
+                    }
+                    codeString.Append(parametersStr[i]);
+                }
+                if (parametersStr.Count > 0)
+                {
+                    codeString.Append(",");
+                }
+                codeString.Append(attribute.GetInvokeOption());
+                codeString.AppendLine(") where TClient:");
+
+                for (int i = 0; i < InterfaceTypes.Length; i++)
                 {
                     if (i > 0)
                     {
                         codeString.Append(",");
                     }
 
-                    codeString.Append(string.Format("{0}", parameters[i].Name));
+                    codeString.Append(InterfaceTypes[i].FullName);
                 }
-                if (parameters.Length > 0)
+
+                codeString.AppendLine("{");//方法开始
+
+                codeString.AppendLine("if (client.TryCanInvoke?.Invoke(client)==false)");
+                codeString.AppendLine("{");
+                codeString.AppendLine($"throw new RpcException(\"Rpc无法执行。\");");
+                codeString.AppendLine("}");
+
+                if (parametersStr.Count>0)
                 {
-                    codeString.Append(",");
+                    codeString.Append($"object[] parameters = new object[]");
+                    codeString.Append("{");
+                    foreach (ParameterInfo parameter in parameters)
+                    {
+                        codeString.Append(parameter.Name);
+                        if (parameter != parameters[parameters.Length - 1])
+                        {
+                            codeString.Append(",");
+                        }
+                    }
+                    codeString.AppendLine("};");
                 }
-                codeString.Append("invokeOption);");
-                codeString.AppendLine("});");
+               
+
+                if (methodInstance.HasReturn)
+                {
+                    if (parametersStr.Count == 0)
+                    {
+                        codeString.Append(string.Format("return client.InvokeAsync<{0}>", this.GetName(methodInstance.ReturnType)));
+                        codeString.Append("(");
+                        codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                        codeString.AppendLine(",invokeOption, null);");
+                    }
+                    else
+                    {
+                        codeString.Append(string.Format("return client.InvokeAsync<{0}>", this.GetName(methodInstance.ReturnType)));
+                        codeString.Append("(");
+                        codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                        codeString.AppendLine(",invokeOption, parameters);");
+                    }
+                }
+                else
+                {
+                    if (parametersStr.Count == 0)
+                    {
+                        codeString.Append("return client.InvokeAsync(");
+                        codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                        codeString.AppendLine(",invokeOption, null);");
+                    }
+                    else
+                    {
+                        codeString.Append("return client.InvokeAsync(");
+                        codeString.Append($"\"{attribute.GetInvokenKey(methodInstance)}\"");
+                        codeString.AppendLine(",invokeOption, parameters);");
+                    }
+                    
+                }
                 codeString.AppendLine("}");
             }
             return codeString.ToString();

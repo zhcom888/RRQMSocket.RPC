@@ -5,83 +5,218 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
+using RRQMCore;
+using RRQMCore.Extensions;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
 
 namespace RRQMSocket.RPC
 {
     /// <summary>
-    /// RPC方法属性基类
+    /// Rpc方法属性基类
     /// </summary>
-    public abstract class RPCAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public abstract class RpcAttribute : Attribute
     {
-        private MethodFlags methodFlags = MethodFlags.None;
-
         /// <summary>
         /// 构造函数
         /// </summary>
-        public RPCAttribute()
+        public RpcAttribute()
         {
-            this.async = true;
-        }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="methodFlags"></param>
-        public RPCAttribute(MethodFlags methodFlags)
-        {
-            this.methodFlags = methodFlags;
-            this.async = true;
-        }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="methodName"></param>
-        /// <param name="methodFlags"></param>
-        public RPCAttribute(string methodName, MethodFlags methodFlags)
-        {
-            this.MethodName = methodName;
-            this.methodFlags = methodFlags;
-            this.async = true;
-        }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="methodName"></param>
-        public RPCAttribute(string methodName)
-        {
-            this.MethodName = methodName;
-            this.async = true;
-        }
-
-        private bool async;
-        /// <summary>
-        /// 异步执行(默认True)。
-        /// </summary>
-        public bool Async
-        {
-            get { return async; }
-            set { async = value; }
+            this.MethodFlags = MethodFlags.None;
+            this.m_exceptions.Add(typeof(TimeoutException), "调用超时");
+            this.m_exceptions.Add(typeof(RRQMRpcInvokeException), "Rpc调用异常");
+            this.m_exceptions.Add(typeof(RRQMException), "其他异常");
         }
 
         /// <summary>
         /// 函数标识
         /// </summary>
-        public MethodFlags MethodFlags
+        public MethodFlags MethodFlags { get; set; }
+
+        /// <summary>
+        /// 异常提示
+        /// </summary>
+        public Dictionary<Type, string> Exceptions => this.m_exceptions;
+
+        /// <summary>
+        /// 重新指定生成的函数名称。可以使用类似“JsonRpc_{0}”的模板格式。
+        /// </summary>
+        public string MethodName { get; set; }
+
+        private readonly Dictionary<Type, string> m_exceptions = new Dictionary<Type, string>();
+
+        /// <summary>
+        /// 获取注释信息
+        /// </summary>
+        /// <param name="methodInstance"></param>
+        /// <returns></returns>
+        public virtual string GetDescription(MethodInstance methodInstance)
         {
-            get { return methodFlags; }
-            set { methodFlags = value; }
+            return string.IsNullOrEmpty(methodInstance.Description) ? "无注释信息" : methodInstance.Description;
         }
 
         /// <summary>
-        /// 函数名
+        /// 获取返回值
         /// </summary>
-        public string MethodName { get; set; }
+        /// <param name="methodInstance"></param>
+        /// <param name="classCodeGenerator"></param>
+        /// <param name="isAsync"></param>
+        /// <returns></returns>
+        public virtual string GetReturn(MethodInstance methodInstance, ClassCodeGenerator classCodeGenerator, bool isAsync)
+        {
+            if (isAsync)
+            {
+                if (methodInstance.ReturnType == null)
+                {
+                    return "Task";
+                }
+                else
+                {
+                    return $"Task<{classCodeGenerator.GetTypeFullName(methodInstance.ReturnType)}>";
+                }
+            }
+            else
+            {
+                if (methodInstance.ReturnType == null)
+                {
+                    return "void";
+                }
+                else
+                {
+                    return classCodeGenerator.GetTypeFullName(methodInstance.ReturnType);
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// 获取生成的函数名称
+        /// </summary>
+        /// <param name="methodInstance"></param>
+        /// <param name="isAsync"></param>
+        /// <returns></returns>
+        public virtual string GetMethodName(MethodInstance methodInstance, bool isAsync)
+        {
+            string name;
+            if (string.IsNullOrEmpty(this.MethodName))
+            {
+                name = methodInstance.Name;
+            }
+            else
+            {
+                name = this.MethodName.Format(methodInstance.Name);
+            }
+            return isAsync ? name + "Async" : name;
+        }
+
+        /// <summary>
+        /// 获取生成的函数泛型限定名称。默认<see cref="IRpcClient"/>
+        /// </summary>
+        /// <returns></returns>
+        public virtual Type[] GetGenericInterfaceTypes()
+        {
+            return new Type[] { typeof(IRpcClient) };
+        }
+
+        /// <summary>
+        /// 获取调用键
+        /// </summary>
+        /// <param name="methodInstance"></param>
+        /// <returns></returns>
+        public virtual string GetInvokenKey(MethodInstance methodInstance)
+        {
+            return methodInstance.RouteKey;
+        }
+
+        /// <summary>
+        /// 获取参数生成
+        /// </summary>
+        /// <param name="methodInstance"></param>
+        /// <param name="classCodeGenerator"></param>
+        /// <param name="isOut"></param>
+        /// <param name="isRef"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public virtual List<string> GetParameters(MethodInstance methodInstance, ClassCodeGenerator classCodeGenerator, out bool isOut, out bool isRef, out ParameterInfo[] parameters)
+        {
+            List<string> list = new List<string>();
+            isOut = false;
+            isRef = false;
+
+            if (methodInstance.MethodFlags.HasFlag(MethodFlags.IncludeCallContext))
+            {
+                List<ParameterInfo> infos = new List<ParameterInfo>(methodInstance.Parameters);
+                infos.RemoveAt(0);
+                parameters = infos.ToArray();
+            }
+            else
+            {
+                parameters = methodInstance.Parameters;
+            }
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                StringBuilder codeString = new StringBuilder();
+                if (parameters[i].ParameterType.Name.Contains("&"))
+                {
+                    if (parameters[i].IsOut)
+                    {
+                        isOut = true;
+                        codeString.Append(string.Format("out {0} {1}", classCodeGenerator.GetTypeFullName(parameters[i].ParameterType), parameters[i].Name));
+                    }
+                    else
+                    {
+                        isRef = true;
+                        codeString.Append(string.Format("ref {0} {1}", classCodeGenerator.GetTypeFullName(parameters[i].ParameterType), parameters[i].Name));
+                    }
+                }
+                else
+                {
+                    codeString.Append(string.Format("{0} {1}", classCodeGenerator.GetTypeFullName(parameters[i].ParameterType), parameters[i].Name));
+                }
+
+                if (parameters[i].HasDefaultValue)
+                {
+                    object defaultValue = parameters[i].DefaultValue;
+                    if (defaultValue == null)
+                    {
+                        codeString.Append(string.Format("=null"));
+                    }
+                    else if (defaultValue.ToString() == string.Empty)
+                    {
+                        codeString.Append(string.Format("=\"\""));
+                    }
+                    else if (defaultValue.GetType() == typeof(string))
+                    {
+                        codeString.Append(string.Format("=\"{0}\"", defaultValue));
+                    }
+                    else if (typeof(ValueType).IsAssignableFrom(defaultValue.GetType()))
+                    {
+                        codeString.Append(string.Format("={0}", defaultValue));
+                    }
+                }
+
+                list.Add(codeString.ToString());
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// 获取调用配置
+        /// </summary>
+        /// <returns></returns>
+        public virtual string GetInvokeOption()
+        {
+            return "IInvokeOption invokeOption = default";
+        }
     }
 }

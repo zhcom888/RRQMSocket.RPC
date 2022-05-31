@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -13,38 +14,13 @@
 namespace RRQMSocket.RPC
 {
     /// <summary>
-    /// RRQM的RPC服务接口
+    /// Rpc服务接口
     /// </summary>
     public interface IServerProvider
     {
         /// <summary>
-        /// 该服务所属的服务器
+        /// 设置RPC仓储中心
         /// </summary>
-        RPCService RPCService { get; set; }
-
-        /// <summary>
-        /// RPC即将进入,
-        /// 若是想放弃本次执行，请抛出<see cref="RRQMAbandonRPCException"/>
-        /// </summary>
-        /// <param name="parser"></param>
-        /// <param name="methodInvoker"></param>
-        /// <param name="methodInstance"></param>
-        void RPCEnter(IRPCParser parser, MethodInvoker methodInvoker, MethodInstance methodInstance);
-
-        /// <summary>
-        /// 执行RPC发生错误
-        /// </summary>
-        /// <param name="parser"></param>
-        /// <param name="methodInvoker"></param>
-        /// <param name="methodInstance"></param>
-        void RPCError(IRPCParser parser, MethodInvoker methodInvoker, MethodInstance methodInstance);
-
-        /// <summary>
-        /// RPC方法执行完成
-        /// </summary>
-        /// <param name="parser"></param>
-        /// <param name="methodInvoker"></param>
-        /// <param name="methodInstance"></param>
-        void RPCLeave(IRPCParser parser, MethodInvoker methodInvoker, MethodInstance methodInstance);
+        void SetRpcStore(RpcStore rpcCerter);
     }
 }

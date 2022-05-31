@@ -5,6 +5,7 @@
 //  哔哩哔哩视频：https://space.bilibili.com/94253567
 //  Gitee源代码仓库：https://gitee.com/RRQM_Home
 //  Github源代码仓库：https://github.com/RRQM
+//  API首页：https://www.yuque.com/eo2w71/rrqm
 //  交流QQ群：234762506
 //  感谢您的下载和使用
 //------------------------------------------------------------------------------
@@ -19,40 +20,60 @@ namespace RRQMSocket.RPC.JsonRpc
     /// </summary>
     public class JsonRpcServerCallContext : ICallContext
     {
-        internal ICaller caller;
-        internal JsonRpcContext context;
-        internal MethodInstance methodInstance;
-        internal string jsonString;
-        internal JsonRpcProtocolType protocolType;
-        internal MethodInvoker methodInvoker;
-        internal CancellationTokenSource tokenSource = default;
+        private object m_caller;
+        private JsonRpcContext m_context;
+        private MethodInstance m_methodInstance;
+        private string m_jsonString;
+        private CancellationTokenSource m_tokenSource;
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="caller"></param>
+        /// <param name="context"></param>
+        /// <param name="methodInstance"></param>
+        /// <param name="jsonString"></param>
+        public JsonRpcServerCallContext(object caller, JsonRpcContext context, MethodInstance methodInstance, string jsonString)
+        {
+            this.m_caller = caller;
+            this.m_context = context;
+            this.m_methodInstance = methodInstance;
+            this.m_jsonString = jsonString;
+        }
 
         /// <summary>
         /// Json字符串
         /// </summary>
-        public string JsonString
-        {
-            get { return jsonString; }
-        }
+        public string JsonString => this.m_jsonString;
 
         /// <summary>
-        /// 协议类型
+        /// <inheritdoc/>
         /// </summary>
-        public JsonRpcProtocolType ProtocolType
+        public object Caller => this.m_caller;
+
+        /// <summary>
+        /// JsonRpc上下文
+        /// </summary>
+        public JsonRpcContext Context => this.m_context;
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public MethodInstance MethodInstance => this.m_methodInstance;
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public CancellationTokenSource TokenSource
         {
-            get { return protocolType; }
-            set { protocolType = value; }
+            get
+            {
+                if (this.m_tokenSource == null)
+                {
+                    this.m_tokenSource = new CancellationTokenSource();
+                }
+                return this.m_tokenSource;
+            }
         }
-
-#pragma warning disable CS1591
-        public ICaller Caller => this.caller;
-
-        public IRpcContext Context => this.context;
-
-        public MethodInstance MethodInstance => this.methodInstance;
-
-        public MethodInvoker MethodInvoker => this.methodInvoker;
-
-        public CancellationTokenSource TokenSource => this.tokenSource;
     }
 }
